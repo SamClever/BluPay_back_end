@@ -6,15 +6,15 @@ from .views import (
 )
 
 urlpatterns = [
-    # Transaction endpoints
+   # Transaction endpoints
     path('transactions/', transaction_list, name='transaction_list'),
-    path('transactions/<int:pk>/', transaction_detail, name='transaction_detail'),
+    path('transactions/<uuid:pk>/', transaction_detail, name='transaction_detail'),
     
     # CreditCard endpoints
     path('creditcards/', creditcard_list, name='creditcard_list'),
-    path('creditcards/<int:pk>/', creditcard_detail, name='creditcard_detail'),
+    path('creditcards/<uuid:pk>/', creditcard_detail, name='creditcard_detail'),
     
     # Notification endpoints
     path('notifications/', notification_list, name='notification_list'),
-    path('notifications/<int:pk>/', notification_detail, name='notification_detail'),
+    path('notifications/<uuid:pk>/', notification_detail, name='notification_detail'),
 ]
