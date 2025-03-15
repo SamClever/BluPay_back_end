@@ -3,6 +3,10 @@ from django.utils.html import format_html
 from .models import Account, KYC
 
 # Optional: Inline for the KYC model in the Account admin
+
+
+
+    
 class KYCInline(admin.StackedInline):
     model = KYC
     extra = 0
@@ -25,7 +29,8 @@ class AccountAdmin(admin.ModelAdmin):
     list_filter = ('account_status', 'date')
     search_fields = ('user__username', 'account_number', 'account_id')
     ordering = ('-date',)
-    inlines = [KYCInline]  # Shows KYC details inline if available
+    readonly_fields = ('date',)
+    inlines = [KYCInline]  # if you want to include KYC details inline
 
     fieldsets = (
         ('Basic Information', {
@@ -37,23 +42,8 @@ class AccountAdmin(admin.ModelAdmin):
         ('Additional Info', {
             'fields': ('recommended_by',)
         }),
-        ('Metadata', {
-            'fields': ('date',)
-        }),
+        # Removed 'Metadata' fieldset containing 'date'
     )
-
-    def get_fieldsets(self, request, obj=None):
-        # When adding a new Account (obj is None), remove the Metadata fieldset
-        if obj is None:
-            fieldsets = super().get_fieldsets(request, obj)
-            # Exclude any fieldset that contains 'date'
-            fieldsets = tuple(
-                (name, opts)
-                for name, opts in fieldsets
-                if 'date' not in opts.get('fields', ())
-            )
-            return fieldsets
-        return super().get_fieldsets(request, obj)
 
 
 
@@ -63,7 +53,7 @@ class KYCAdmin(admin.ModelAdmin):
     list_filter = ('gender', 'identity_type', 'country', 'state')
     search_fields = ('user__username', 'full_name', 'country', 'state', 'city')
     ordering = ('-date',)
-
+    readonly_fields = ('date',)
     fieldsets = (
         ('Personal Information', {
             'fields': ('user', 'account', 'full_name', 'image', 'signature', 'date_of_birth')
@@ -74,7 +64,7 @@ class KYCAdmin(admin.ModelAdmin):
         ('Address & Contact', {
             'fields': ('country', 'state', 'city', 'mobile', 'fax')
         }),
-        ('Metadata', {
-            'fields': ('date',)
-        }),
+        # Do not include a fieldset for 'date' since it's non-editable.
     )
+
+    

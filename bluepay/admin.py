@@ -3,9 +3,7 @@ from .models import Transaction, CreditCard, Notification
 
 @admin.register(Transaction)
 class TransactionAdmin(admin.ModelAdmin):
-    list_display = (
-        'transaction_id', 'user', 'amount', 'status', 'transaction_type', 'date'
-    )
+    list_display = ['user', 'transaction_id', 'amount', 'status', 'transaction_type','reciver', 'sender']
     list_filter = ('status', 'transaction_type', 'date')
     search_fields = ('transaction_id', 'user__username', 'description')
     readonly_fields = ('transaction_id', 'date')

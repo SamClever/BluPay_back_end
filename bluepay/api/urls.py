@@ -11,8 +11,8 @@ urlpatterns = [
     path('transactions/<uuid:pk>/', transaction_detail, name='transaction_detail'),
     
     # CreditCard endpoints
-    path('creditcards/', creditcard_list, name='creditcard_list'),
-    path('creditcards/<uuid:pk>/', creditcard_detail, name='creditcard_detail'),
+    path('cards/', creditcard_list, name='creditcard_list'),
+    path('cards/<uuid:pk>/', creditcard_detail, name='creditcard_detail'),
     
     # Notification endpoints
     path('notifications/', notification_list, name='notification_list'),

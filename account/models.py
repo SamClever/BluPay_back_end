@@ -24,9 +24,12 @@ IDENTITY_TYPE = (
 )
 
 def user_directory_path(instance, filename):
-    ext = filename.split(".")[-1]
+    ext = filename.split('.')[-1]
     filename = f"{instance.id}_{ext}"
-    return f"user_{instance.user.id}/{filename}"
+    # If instance has a user, use its id; otherwise, use a default folder.
+    if hasattr(instance, 'user') and instance.user:
+        return f"user_{instance.user.id}/{filename}"
+    return f"user_default/{filename}"
 
 class Account(models.Model):
     id = models.UUIDField(primary_key=True, unique=True, default=uuid.uuid4, editable=False)
