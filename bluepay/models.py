@@ -76,30 +76,74 @@ class Transaction(models.Model):
             return f"{self.user}"
         except:
             return f"Transaction"
+        
 
 
 
-
-class CreditCard(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    card_id = ShortUUIDField(unique=True, length=5, max_length=20, prefix="CARD", alphabet="1234567890")
-
-    name = models.CharField(max_length=100)
-    number = models.IntegerField()
-    month = models.IntegerField()
-    year = models.IntegerField()
-    cvv = models.IntegerField()
-
-    amount = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
-
-    card_type = models.CharField(choices=CARD_TYPE, max_length=20, default="master")
-    card_status = models.BooleanField(default=True)
-
-    date = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.user}"
+class VirtualCard(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    card_id = ShortUUIDField(unique=True, length=10, prefix="VCRD")
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="virtual_cards")
+    card_token = models.CharField(max_length=255)
+    masked_number = models.CharField(max_length=20)
+    expiration_date = models.DateField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    active = models.BooleanField(default=True)
     
+    def __str__(self):
+        return f"{self.account.user} - {self.masked_number}"
+    
+
+
+class PaymentTransaction(models.Model):
+    TRANSACTION_TYPE_CHOICES = (
+        ('purchase', 'Purchase'),
+        ('refund', 'Refund'),
+        ('transfer', 'Transfer'),
+    )
+    TRANSACTION_STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('completed', 'Completed'),
+        ('failed', 'Failed'),
+    )
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    transaction_id = ShortUUIDField(unique=True, length=15, prefix="TRX")
+    account = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, related_name="transactions")
+    virtual_card = models.ForeignKey(VirtualCard, on_delete=models.SET_NULL, null=True, blank=True, related_name="transactions")
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    transaction_type = models.CharField(max_length=20, choices=TRANSACTION_TYPE_CHOICES)
+    status = models.CharField(max_length=20, choices=TRANSACTION_STATUS_CHOICES, default="pending")
+    description = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return self.transaction_id
+
+
+
+class NFCDevice(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="nfc_devices")
+    device_id = models.CharField(max_length=255, unique=True)
+    device_name = models.CharField(max_length=255, blank=True)
+    registered_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.device_id
+
+class PaymentToken(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    token = ShortUUIDField(unique=True, length=20, prefix="TKN")
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="payment_tokens")
+    virtual_card = models.ForeignKey(VirtualCard, on_delete=models.SET_NULL, null=True, blank=True, related_name="payment_tokens")
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    
+    def __str__(self):
+        return self.token
+
+
 
 
 class Notification(models.Model):
