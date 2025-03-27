@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
-
+import random
 
 
 
@@ -30,6 +30,8 @@ class CustomUserManager(BaseUserManager):
             raise ValueError('Superuser must have is_superuser=True.')
         return self.create_user(email, password, **extra_fields)
 
+
+
 class User(AbstractUser):
     email = models.EmailField(unique=True)
     terms_accepted = models.BooleanField(default=False)
@@ -41,3 +43,26 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.email
+    
+
+
+
+
+PURPOSE_CHOICES = (
+    ('registration', 'Registration'),
+    ('login', 'Login'),
+)
+
+
+def generate_otp():
+    return str(random.randint(100000, 999999))
+
+class OTPVerification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='otp_verifications')
+    otp_code = models.CharField(max_length=6, default=generate_otp)
+    purpose = models.CharField(max_length=20, choices=PURPOSE_CHOICES, default='registration')
+    created_at = models.DateTimeField(auto_now_add=True)
+    verified = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.user.email} - {self.otp_code} ({self.purpose})"
