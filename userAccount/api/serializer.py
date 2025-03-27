@@ -21,6 +21,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'email', 'password', 'terms_accepted')
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
 
     def validate_terms_accepted(self, value):
         if value is not True:
@@ -34,6 +37,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             validated_data['username'] = validated_data.get('email')
         user = User.objects.create_user(**validated_data)
         return user
+
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
