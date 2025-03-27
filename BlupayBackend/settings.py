@@ -245,3 +245,6 @@ EMAIL_USE_SSL = True  # Port 465 typically requires SSL
 EMAIL_HOST_USER = 'info@theblupay.com' 
 EMAIL_HOST_PASSWORD = '@Blu123pay'      
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+
+

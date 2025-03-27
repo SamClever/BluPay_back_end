@@ -51,6 +51,7 @@ class User(AbstractUser):
 PURPOSE_CHOICES = (
     ('registration', 'Registration'),
     ('login', 'Login'),
+    ('forgot_password', 'Forgot Password'),
 )
 
 
@@ -66,3 +67,10 @@ class OTPVerification(models.Model):
 
     def __str__(self):
         return f"{self.user.email} - {self.otp_code} ({self.purpose})"
+    
+
+    class Meta:
+        verbose_name = "OTP VERIFICATION"  # Singular name
+        verbose_name_plural = "OTP VERIFICATIONS"  # Plural name
+    
+   

@@ -1,3 +1,24 @@
-<p>Hello {{ user.email }},</p>
-<p>Thank you for registering. Your OTP code for account verification is: <strong>{{ otp_code }}</strong>.</p>
-<p>Please enter this code in the app to verify your account.</p>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Account Verification</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f7f7f7; padding: 20px; }
+    .container { background-color: #ffffff; padding: 20px; border-radius: 8px; }
+    h2 { color: #333333; }
+    p { color: #555555; }
+    .otp { font-size: 24px; font-weight: bold; color: #007BFF; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Hello {{ user.email }},</h2>
+    <p>Thank you for registering with us.</p>
+    <p>Your OTP code for account verification is:</p>
+    <p class="otp">{{ otp_code }}</p>
+    <p>Please enter this code in your app to verify your account.</p>
+    <p>Regards,<br/>Your Company Name</p>
+  </div>
+</body>
+</html>
