@@ -25,8 +25,8 @@ from django.contrib.auth import authenticate
 from django.core.mail import send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
-
-
+from django.contrib.auth.password_validation import validate_password
+from rest_framework.exceptions import ValidationError
 
 
 User = get_user_model()
@@ -143,6 +143,176 @@ def verify_login_otp(request):
         return Response({"error": "Invalid OTP code."}, status=status.HTTP_400_BAD_REQUEST)
     
 
+
+
+
+# RESEND OTP FUNCTIONALITY
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def resend_otp(request):
+    """
+    Resend OTP code for a given email and purpose.
+    The request should include:
+      - email: user's email
+      - purpose: either "registration" or "login" (defaults to "registration" if not provided)
+    """
+    email = request.data.get('email')
+    purpose = request.data.get('purpose', 'registration')
+    if not email:
+        return Response({"error": "Email is required."}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+    
+    # Check for an existing unverified OTP for this purpose.
+    otp_record = user.otp_verifications.filter(purpose=purpose, verified=False).order_by('-created_at').first()
+    if not otp_record:
+        otp_record = OTPVerification.objects.create(user=user, purpose=purpose)
+    
+    # Select the correct email template and subject based on the purpose.
+    if purpose == 'registration':
+        template_name = 'emails/registration_otp.html'
+        subject = 'Your OTP Code for Account Verification'
+    elif purpose == 'login':
+        template_name = 'emails/login_otp.html'
+        subject = 'Your OTP Code for Login'
+    else:
+        return Response({"error": "Invalid OTP purpose."}, status=status.HTTP_400_BAD_REQUEST)
+    
+    message = render_to_string(template_name, {
+        'user': user,
+        'otp_code': otp_record.otp_code,
+    })
+    from_email = settings.DEFAULT_FROM_EMAIL
+    recipient_list = [user.email]
+    send_mail(subject, message, from_email, recipient_list)
+    
+    return Response({"message": "OTP code has been resent to your email."}, status=status.HTTP_200_OK)
+
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def forgot_password(request):
+    """
+    Endpoint to initiate password reset. Expects:
+      { "email": "user@example.com" }
+    If the email exists, an OTP (for forgot_password) is generated and sent.
+    """
+    email = request.data.get('email')
+    if not email:
+        return Response({"error": "Email is required."}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+    
+    # Create an OTP record for password reset
+    otp_record = OTPVerification.objects.create(user=user, purpose='forgot_password')
+    
+    # Render an email template (create "emails/forgot_password_otp.html")
+    message = render_to_string('emails/forgot_password_otp.html', {
+        'user': user,
+        'otp_code': otp_record.otp_code,
+    })
+    subject = 'Your OTP Code for Password Reset'
+    from_email = settings.DEFAULT_FROM_EMAIL
+    recipient_list = [user.email]
+    send_mail(subject, message, from_email, recipient_list)
+    
+    return Response({"message": "OTP code sent to your email. Please check your email to verify your identity."}, status=status.HTTP_200_OK)
+
+
+
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def verify_forgot_password_otp(request):
+    """
+    Endpoint to verify the OTP for password reset.
+    Expects:
+      { "email": "user@example.com", "otp_code": "123456" }
+    """
+    email = request.data.get('email')
+    otp_code = request.data.get('otp_code')
+    if not email or not otp_code:
+        return Response({"error": "Email and OTP code are required."}, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+    
+    otp_record = user.otp_verifications.filter(
+        otp_code=otp_code,
+        purpose='forgot_password',
+        verified=False
+    ).order_by('-created_at').first()
+    
+    if otp_record:
+        otp_record.verified = True
+        otp_record.save()
+        return Response({"message": "OTP verified successfully. You can now reset your password."}, status=status.HTTP_200_OK)
+    else:
+        return Response({"error": "Invalid OTP code."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def reset_password(request):
+    """
+    Endpoint to reset the user's password.
+    Expects:
+      {
+         "email": "user@example.com",
+         "new_password": "NewSecurePassword123!",
+         "confirm_password": "NewSecurePassword123!"
+      }
+    The endpoint checks for a verified OTP (purpose "forgot_password") before resetting the password.
+    """
+    email = request.data.get('email')
+    new_password = request.data.get('new_password')
+    confirm_password = request.data.get('confirm_password')
+    
+    if not email or not new_password or not confirm_password:
+        return Response({"error": "Email, new_password, and confirm_password are required."}, status=status.HTTP_400_BAD_REQUEST)
+    
+    if new_password != confirm_password:
+        return Response({"error": "New password and confirmation do not match."}, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+    
+    # Check that there is a verified OTP record for forgot_password
+    otp_record = user.otp_verifications.filter(
+        purpose='forgot_password',
+        verified=True
+    ).order_by('-created_at').first()
+    
+    if not otp_record:
+        return Response({"error": "OTP verification required before resetting password."}, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Optionally, you can add a check for OTP expiration here.
+    
+    try:
+        validate_password(new_password, user)
+    except ValidationError as e:
+        return Response({"error": e.messages}, status=status.HTTP_400_BAD_REQUEST)
+    
+    user.set_password(new_password)
+    user.save()
+    
+    # Optionally, mark or delete the OTP record so it can't be reused.
+    otp_record.delete()
+    
+    return Response({"message": "Password reset successfully."}, status=status.HTTP_200_OK)
+
     
 
 
@@ -188,6 +358,7 @@ def validate_google_token(request):
         except json.JSONDecodeError:
             return JsonResponse({'details':'invalid json'}, status=400)
     return JsonResponse({'error': 'Methods not allowed'}, status=400)
+
 
 
 
