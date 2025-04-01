@@ -6,9 +6,11 @@ from .views import (
     payment_transaction_list, payment_transaction_detail,
     nfcdevice_list, nfcdevice_detail,
     paymenttoken_list, paymenttoken_detail,
+    index,
 )
 
 urlpatterns = [
+    path('', index, name='index'),
    # Transaction endpoints
     path('transactions/', transaction_list, name='transaction_list'),
     path('transactions/<uuid:pk>/', transaction_detail, name='transaction_detail'),

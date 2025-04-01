@@ -27,6 +27,7 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from django.contrib.auth.password_validation import validate_password
 from rest_framework.exceptions import ValidationError
+import requests
 
 
 User = get_user_model()
@@ -358,6 +359,59 @@ def validate_google_token(request):
         except json.JSONDecodeError:
             return JsonResponse({'details':'invalid json'}, status=400)
     return JsonResponse({'error': 'Methods not allowed'}, status=400)
+
+
+
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def google_login(request):
+    """
+    Endpoint for logging in with a Google account.
+    
+    Expects a JSON payload:
+    {
+        "id_token": "<Google ID token>"
+    }
+    
+    The endpoint verifies the token with Google, retrieves user details,
+    creates a new user if needed, and returns JWT tokens.
+    """
+    id_token = request.data.get("id_token")
+    if not id_token:
+        return Response({"error": "id_token is required."}, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Verify the token with Google's tokeninfo endpoint.
+    google_response = requests.get("https://oauth2.googleapis.com/tokeninfo", params={"id_token": id_token})
+    if google_response.status_code != 200:
+        return Response({"error": "Invalid Google token."}, status=status.HTTP_400_BAD_REQUEST)
+    
+    token_data = google_response.json()
+    email = token_data.get("email")
+    email_verified = token_data.get("email_verified")
+    
+    if not email or email_verified != "true":
+        return Response({"error": "Google email is not verified."}, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Get or create the user.
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        # Create a new user with the email and a random password.
+        user = User.objects.create_user(
+            email=email,
+            username=email,  # Use email as username if applicable.
+            password=User.objects.make_random_password()
+        )
+    
+    # Issue JWT tokens using simplejwt.
+    refresh = RefreshToken.for_user(user)
+    return Response({
+        "message": "Login successful.",
+        "access_token": str(refresh.access_token),
+        "refresh_token": str(refresh)
+    }, status=status.HTTP_200_OK)
 
 
 
