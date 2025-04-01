@@ -12,7 +12,7 @@ urlpatterns = [
     path('userAuth/', include('userAccount.api.urls')), 
     path('Account/', include('Accounts.api.urls')),
     path('accounts/', include('allauth.urls')),
-    path('blupay/', include('bluepay.api.urls')),
+    path('', include('bluepay.api.urls')),
     
 ]
 

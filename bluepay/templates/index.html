@@ -1,0 +1,155 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+
+<div class="wrap main-bg table-div">
+    <div class="view-box d-cell">
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-12 col-md-3 position">
+                    <div class="logo">
+                        <a href="#"><img src="{% static 'images/logo-1.png' %}" alt="" /></a>
+                    </div>
+                    <div class="social-box-bot clearfix">
+                        <ul>
+                            <li><a href="#" data-toggle="tooltip" data-placement="top" title="Follow On Facebook"><i class="fa fa-facebook"></i></a></li>
+                            <li><a href="#" data-toggle="tooltip" data-placement="top" title="Follow On Twitter"><i class="fa fa-twitter"></i></a></li>
+                            <li><a href="#" data-toggle="tooltip" data-placement="top" title="Follow On Google Plus"><i class="fa fa-google-plus"></i></a></li>
+                            <li><a href="#" data-toggle="tooltip" data-placement="top" title="Follow On Instagram"><i class="fa fa-instagram"></i></a></li>
+                            <li><a href="#" data-toggle="tooltip" data-placement="top" title="Follow On Youtube"><i class="fa fa-youtube-play"></i></a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-md-9">
+                    <div class="main-content">
+                        <div class="countdown main-time clearfix">
+                            <div id="timer">
+                                <div id="days"></div>
+                                <div id="hours"></div>
+                                <div id="minutes"></div>
+                                <div id="seconds"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="md-headline clearfix">
+                            <h1>Our New Blupay Coming Soon<a href="">Blupay</a></h1>
+                            <p>Blupay – The Future of Seamless Payments is Coming Soon!
+
+                                Get ready for a game-changing payment experience with Blupay! Our cutting-edge NFC payment app is designed to make transactions faster, safer, and more convenient—whether you're shopping online or making in-store purchases.
+                                
+                                💳 Tap & Pay Instantly
+                                📱 Secure & Hassle-Free Transactions
+                                🌍 Anywhere, Anytime – Web & Mobile
+                                
+                                Stay tuned as we revolutionize digital payments with Blupay! Coming soon to web and mobile </p>
+                        </div>
+                        
+                        <div class="btn-box">
+                            <a href="#" class="btn notify-btn">Notify Me</a>
+                            <a href="#" class="btn more-infobtn" data-toggle="modal" data-target="#exampleModalCenter">More Info</a>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="scrollbar-right" class="right-box wh-bg">
+        <div class="close-icon">
+            <img src="{% static 'images/close.png' %}" alt="Close" />
+        </div>
+        <div class="box-inner">
+            <div class="about-box">
+                <div class="about-title">
+                    <h1>We are Blupay</h1>
+                </div>
+                <div class="row about-content clearfix">
+                    <div class="col-lg-4 pull-left">
+                        <img src="{% static 'images/logo2.png' %}" alt="" />
+                    </div>
+                    <div class="col-lg-8 rihgt-dit">
+                        <h3>Since 2018</h3>
+                        <a href="">Blupay</a>
+                        <p>Blupay – The Future of Seamless Payments is Coming Soon!
+
+                            Get ready for a game-changing payment experience with Blupay! Our cutting-edge NFC payment app is designed to make transactions faster, safer, and more convenient—whether you're shopping online or making in-store purchases.
+                            
+                            💳 Tap & Pay Instantly
+                            📱 Secure & Hassle-Free Transactions
+                            🌍 Anywhere, Anytime – Web & Mobile
+                            
+                            Stay tuned as we revolutionize digital payments with Blupay! Coming soon to web and mobile</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="contact-box">
+                <div class="contact-title">
+                    <h1>Contact Us</h1>
+                </div>
+                <div class="content-ct">
+                    <ul class="clearfix">
+                        <li><p>6915 Campus Court, Tampa, FL 33620</p></li>
+                        <li><a href="mailto:info@theblupay.com">info@theblupay.com</a><br><a href="mailto:info@theblupay.com">info@theblupay.com</a></li>
+                        <li><a href="tel:+(255) 772236727"><span>T</span> +(255) 772236727</a><br><a href="tel:+(255) 772236727"><span>M</span>+(255) 772236727</a></li>
+                    </ul>
+                    <div class="contact-form">
+                        <form id="contact_form" class="custom-input">
+                            <div class="row">
+                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                    <input type="text" name="first_name" id="first_name" class="form-control" placeholder="Your Name">
+                                </div>												
+                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                    <input type="email" name="email" id="email" class="form-control" placeholder="Your Email">
+                                </div>
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                    <textarea class="form-control" name="comments" id="message" rows="6" placeholder="Message"></textarea>
+                                </div>
+                                <div class="pdi-btn text-center">
+                                    <button type="submit" value="SEND" id="submit" class="btn notify-btn">Send Message</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p class="footer-company-name">All Rights Reserved. &copy; 2018 Design By : <a href="">html design</a> | Distributed By: <a href="">Blupay</a></p>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade modal-scale" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">Stay With </h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <img src="{% static 'images/close.png' %}" alt="Close" />
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>We launch our new Web app soon.<br>
+            Please stay updated and follow.</p>
+        <form id="sm-form" novalidate="true">
+            <!-- Input Group -->
+            <div class="input-group">
+                <input id="email" class="form-control" name="EMAIL" placeholder="Enter email adress here" type="email">
+            </div>
+            <button class="btn notify-btn" type="submit">Subscribe</button>
+          <!-- /End Input Group -->
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+{% endblock content %}
