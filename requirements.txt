@@ -1,3 +1,20 @@
-packaging==24.2
-pywatchman==2.0.0
-wheel @ file:///usr/local/Cellar/python%403.13/3.13.2/libexec/wheel-0.45.1-py3-none-any.whl#sha256=b9235939e2096903717cb6bfc132267f8a7e46deb2ec3ef9c5e234ea301795d0
+asgiref==3.8.1
+certifi==2025.1.31
+cffi==1.17.1
+charset-normalizer==3.4.1
+cryptography==44.0.2
+Django==5.1.7
+django-allauth==65.5.0
+django-appconf==1.1.0
+django-cryptography==1.1
+django-jazzmin==3.0.1
+djangorestframework==3.15.2
+djangorestframework_simplejwt==5.5.0
+idna==3.10
+pillow==11.1.0
+pycparser==2.22
+PyJWT==2.9.0
+requests==2.32.3
+shortuuid==1.0.13
+sqlparse==0.5.3
+urllib3==2.3.0

@@ -1,5 +1,5 @@
 from django.db import models
-import uuid
+import uuid, hashlib
 from userAccount.models import User
 from shortuuid.django_fields import ShortUUIDField
 from django.db.models.signals import post_save
@@ -8,20 +8,21 @@ from django.dispatch import receiver
 ACCOUNT_STATUS = (
     ("active", "Active"),
     ("pending", "Pending"),
-    ("inactive", "Inactive"),  # Changed "in-active" to "inactive" for consistency
+    ("inactive", "Inactive"),
 )
 
 GENDER = (
     ("male", "Male"),
     ("female", "Female"),
-    ("other", "Other")
+    ("other", "Other"),
 )
 
 IDENTITY_TYPE = (
     ("national_id_card", "National ID Card"),
     ("drivers_licence", "Drivers Licence"),
-    ("international_passport", "International Passport")
+    ("international_passport", "International Passport"),
 )
+
 
 def user_directory_path(instance, filename):
     ext = filename.split('.')[-1]
@@ -75,26 +76,80 @@ class KYC(models.Model):
     id = models.UUIDField(primary_key=True, unique=True, default=uuid.uuid4, editable=False)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     account = models.OneToOneField(Account, on_delete=models.CASCADE, null=True, blank=True)
-    full_name = models.CharField(max_length=1000)
-    image = models.ImageField(upload_to=user_directory_path, default="default.jpg")
-    gender = models.CharField(choices=GENDER, max_length=40)
-    identity_type = models.CharField(choices=IDENTITY_TYPE, max_length=140)
+    # full_name = models.CharField(max_length=1000)
+    
+
+    # Personal Information
+    First_name = models.CharField(max_length=255)
+    Last_name = models.CharField(
+        max_length=255, 
+        blank=True, 
+        null=True, 
+        help_text="Optional: Enter your family or traditional name if applicable"
+    )
+    date_of_birth = models.DateField()
+    gender = models.CharField(choices=GENDER, max_length=10)
+    
+    # Identity Documents
+    identity_type = models.CharField(choices=IDENTITY_TYPE, max_length=50)
     identity_image = models.ImageField(upload_to=user_directory_path, null=True, blank=True)
-    date_of_birth = models.DateField()  # Changed to DateField
-    signature = models.ImageField(upload_to=user_directory_path)
+    
+    # Verification Images
+    profile_image = models.ImageField(
+        upload_to=user_directory_path, 
+        default="default.jpg",
+        help_text="A clear picture of your face"
+    )
+    face_verification_image = models.ImageField(
+        upload_to=user_directory_path, 
+        null=True, 
+        blank=True,
+        help_text="Image used for face verification"
+    )
+    
 
-    # Address
-    country = models.CharField(max_length=100)
-    state = models.CharField(max_length=100)
-    city = models.CharField(max_length=100)
 
-    # Contact Detail
-    mobile = models.CharField(max_length=1000)
-    fax = models.CharField(max_length=1000)
+    biometric_hash = models.CharField(
+        max_length=64,
+        blank=True,
+        null=True,
+        help_text="SHA-256 hash of the face verification image"
+    )
+    
+    
+    # Address Information
+    address_line1 = models.CharField(max_length=255, blank=True)
+    address_line2 = models.CharField(max_length=255, blank=True)
+    city = models.CharField(max_length=100, blank=True)
+    state = models.CharField(max_length=100, blank=True)
+    zip_code = models.CharField(max_length=20, blank=True)
+    country = models.CharField(max_length=100, blank=True)
+    
+    # Contact Details
+    mobile = models.CharField(max_length=20)
+    fax = models.CharField(max_length=20, null=True, blank=True)
+    
     date = models.DateTimeField(auto_now_add=True)
-
+    
     class Meta:
         ordering = ['-date']
-
+        verbose_name = "KYC Record"
+        verbose_name_plural = "KYC Records"
+    
     def __str__(self):
-        return f"{self.user}"
+        return f"KYC for {self.user.email}"
+    
+
+
+    def save(self, *args, **kwargs):
+        # Compute biometric hash if face_verification_image is provided
+        if self.face_verification_image:
+            try:
+                # Open the image file; ensure the file is read in binary mode.
+                self.face_verification_image.open()
+                data = self.face_verification_image.read()
+                self.biometric_hash = hashlib.sha256(data).hexdigest()
+            except Exception as e:
+                # Optionally, log error or set biometric_hash to None if processing fails
+                self.biometric_hash = None
+        super().save(*args, **kwargs)
