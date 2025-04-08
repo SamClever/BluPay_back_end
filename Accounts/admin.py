@@ -13,12 +13,17 @@ class KYCInline(admin.StackedInline):
     readonly_fields = ('date',)
     fieldsets = (
         ('KYC Details', {
-            'fields': ('full_name', 'image', 'signature', 'date_of_birth', 'gender', 'identity_type', 'identity_image')
+            'fields': ('First_name', 'biometric_hash', 'date_of_birth', 'gender', 'identity_type', 'identity_image')
         }),
         ('Contact & Address', {
             'fields': ('country', 'state', 'city', 'mobile', 'fax')
         }),
+        ('Verification Images', {
+            'fields': ('profile_image', 'face_verification_image')
+        }),
     )
+
+
 
 @admin.register(Account)
 class AccountAdmin(admin.ModelAdmin):
@@ -49,22 +54,19 @@ class AccountAdmin(admin.ModelAdmin):
 
 @admin.register(KYC)
 class KYCAdmin(admin.ModelAdmin):
-    list_display = ('user', 'full_name', 'gender', 'identity_type', 'country', 'state', 'city', 'date')
+    list_display = ('user', 'First_name','Last_name', 'gender', 'identity_type', 'country', 'state', 'city', 'date')
     list_filter = ('gender', 'identity_type', 'country', 'state')
-    search_fields = ('user__username', 'full_name', 'country', 'state', 'city')
+    search_fields = ('user__username', 'First_name', 'country', 'state', 'city')
     ordering = ('-date',)
     readonly_fields = ('date',)
     fieldsets = (
         ('Personal Information', {
-            'fields': ('user', 'account', 'full_name', 'image', 'signature', 'date_of_birth')
+            'fields': ('user', 'account', 'First_name','Last_name', 'profile_image', 'biometric_hash', 'date_of_birth')
         }),
         ('Identification', {
-            'fields': ('gender', 'identity_type', 'identity_image')
+            'fields': ('gender', 'identity_type', 'identity_image', 'face_verification_image')
         }),
         ('Address & Contact', {
             'fields': ('country', 'state', 'city', 'mobile', 'fax')
         }),
-        # Do not include a fieldset for 'date' since it's non-editable.
     )
-
-    

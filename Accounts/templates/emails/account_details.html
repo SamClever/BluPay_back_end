@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Your Account Details</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f7f7f7; padding: 20px; }
+        .container { background-color: #ffffff; padding: 20px; border-radius: 8px; }
+        h2 { color: #333333; }
+        p { color: #555555; }
+        .details { font-size: 18px; font-weight: bold; color: #007BFF; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Hello {{ user.email }},</h2>
+        <p>Your KYC has been submitted successfully.</p>
+        <p class="details">Account Number: {{ account_number }}</p>
+        <p class="details">PIN: {{ pin_number }}</p>
+        <p>Please note, your payment functionality is paused until your KYC is verified.</p>
+        <p>Thank you for using our service.</p>
+    </div>
+</body>
+</html>

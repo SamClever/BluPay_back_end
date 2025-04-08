@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "corsheaders",
     'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -65,6 +66,8 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'allauth.account.middleware.AccountMiddleware',  # <-- Add this line
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = 'BlupayBackend.urls'
 

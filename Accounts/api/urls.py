@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import view_account, view_account_id, view_kyc, view_kyc_id
+from .views import view_account, view_account_id, kyc_view
 
 from django.conf import settings
 from django.conf.urls.static import static
@@ -7,10 +7,12 @@ urlpatterns = [
     # Account endpoints
     path('accounts/', view_account, name='view_account'),
     path('accounts/<uuid:pk>/', view_account_id, name='view_account_id'),
+
     
     # KYC endpoints
-    path('kyc/', view_kyc, name='view_kyc'),
-    path('kyc/<uuid:pk>/', view_kyc_id, name='view_kyc_id'),
+    path('kyc/', kyc_view, name='kyc'),
+    # path('kyc/', view_kyc, name='view_kyc'),
+    # path('kyc/<uuid:pk>/', view_kyc_id, name='view_kyc_id'),
     
 ]
 
