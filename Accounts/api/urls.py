@@ -1,12 +1,13 @@
 from django.urls import path
-from .views import view_account, view_account_id, kyc_view
+from .views import view_account, kyc_view,dashboard
 
 from django.conf import settings
 from django.conf.urls.static import static
 urlpatterns = [
     # Account endpoints
     path('accounts/', view_account, name='view_account'),
-    path('accounts/<uuid:pk>/', view_account_id, name='view_account_id'),
+    # path('accounts/<uuid:pk>/', view_account_id, name='view_account_id'),
+    path('dashboard/', dashboard, name='dashboard-api'),
 
     
     # KYC endpoints

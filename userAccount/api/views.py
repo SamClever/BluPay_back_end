@@ -4,7 +4,7 @@ from userAccount.api.serializer import UserSerializer,UserRegistrationSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from Accounts.models import KYC
-from Accounts.api.serializer import KycSerializer
+from Accounts.api.serializer import KYCSerializer
 from Accounts.models import Account
 from Accounts.api.serializer import AccountSerializer
 from rest_framework import status

@@ -32,6 +32,9 @@ def user_directory_path(instance, filename):
         return f"user_{instance.user.id}/{filename}"
     return f"user_default/{filename}"
 
+
+# -----------------------------------------------------------------------------
+
 class Account(models.Model):
     id = models.UUIDField(primary_key=True, unique=True, default=uuid.uuid4, editable=False)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -87,7 +90,7 @@ class KYC(models.Model):
         null=True, 
         help_text="Optional: Enter your family or traditional name if applicable"
     )
-    date_of_birth = models.DateField()
+    date_of_birth = models.DateField(null=True, blank=True)
     gender = models.CharField(choices=GENDER, max_length=10)
     
     # Identity Documents
