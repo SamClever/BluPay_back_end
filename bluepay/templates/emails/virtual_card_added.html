@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Virtual Card Added</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      color: #333;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background-color: #fff;
+      padding: 20px 30px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .header, .footer {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .content p {
+      line-height: 1.5;
+    }
+    .card-details {
+      background: #eef;
+      padding: 10px;
+      border-radius: 3px;
+      margin: 15px 0;
+    }
+    .card-details li {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Virtual Card Added</h1>
+    </div>
+    <div class="content">
+      {% comment %} <p>Dear {{ user.first_name|default:user.email }},</p> {% endcomment %}
+      <p>Dear {{ card.account.user.first_name|default:card.account.user.email }},</p>
+      <p>Your new virtual card has been successfully added to your account. Please find the details below:</p>
+      <ul class="card-details">
+        <li><strong>Card Type:</strong> {{ card.card_type|default:"Not Specified" }}</li>
+        <li><strong>Masked Number:</strong> {{ card.masked_number }}</li>
+        <li><strong>Expiration Date:</strong> {{ card.expiration_date }}</li>
+        <li><strong>Default Card:</strong> {{ card.default_card|yesno:"Yes,No" }}</li>
+      </ul>
+      <p>If you did not perform this action, please contact our support immediately.</p>
+    </div>
+    <div class="footer">
+      <p>Thank you for choosing our services.</p>
+      <p>Your Blupay</p>
+    </div>
+  </div>
+</body>
+</html>

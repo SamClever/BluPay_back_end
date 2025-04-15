@@ -6,14 +6,11 @@ from django.conf.urls.static import static
 urlpatterns = [
     # Account endpoints
     path('accounts/', view_account, name='view_account'),
-    # path('accounts/<uuid:pk>/', view_account_id, name='view_account_id'),
     path('dashboard/', dashboard, name='dashboard-api'),
 
     
     # KYC endpoints
     path('kyc/', kyc_view, name='kyc'),
-    # path('kyc/', view_kyc, name='view_kyc'),
-    # path('kyc/<uuid:pk>/', view_kyc_id, name='view_kyc_id'),
     
 ]
 

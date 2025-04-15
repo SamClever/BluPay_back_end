@@ -121,10 +121,20 @@ def kyc_view(request):
 # -----------------------------------------------------------------------------
 # Dashboard API Endpoint
 # -----------------------------------------------------------------------------
-
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def dashboard(request):
+    # Get the current user from the request.
     user = request.user
-        # Ensure KYC record exists, else inform the client.
+    # Although the permission ensures the user is authenticated,
+    if not user.is_authenticated:
+        return Response(
+            {"detail": "User not authenticated. You need to log in."},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+
+    
+    # Ensure a KYC record exists for this user.
     try:
         kyc = KYC.objects.get(user=user)
     except KYC.DoesNotExist:
@@ -132,11 +142,11 @@ def dashboard(request):
             {"detail": "You need to submit your KYC."},
             status=status.HTTP_404_NOT_FOUND
         )
-    
 
+    # Retrieve the associated account.
     account = get_object_or_404(Account, user=user)
 
-        # Assuming Transaction and CreditCard models exist and corresponding serializers are set up.
+    # Assuming Transaction and CreditCard models exist and corresponding serializers are set up.
     # recent_transfer = Transaction.objects.filter(
     #     sender=user, transaction_type="transfer", status="completed"
     # ).order_by("-id").first()
