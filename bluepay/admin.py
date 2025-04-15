@@ -33,7 +33,7 @@ class TransactionAdmin(admin.ModelAdmin):
 
 @admin.register(VirtualCard)
 class VirtualCardAdmin(admin.ModelAdmin):
-    list_display = ('card_id', 'account', 'masked_number', 'expiration_date', 'active', 'created_at')
+    list_display = ('card_id', 'account', 'masked_number', 'default_card', 'expiration_date', 'active', 'created_at')
     list_filter = ('active', 'expiration_date', 'created_at')
     search_fields = ('card_id', 'account__user__username', 'masked_number')
     ordering = ('-created_at',)
@@ -43,7 +43,7 @@ class VirtualCardAdmin(admin.ModelAdmin):
             'fields': ('card_id', 'account', 'masked_number', 'expiration_date', 'active'),
         }),
         ('Security', {
-            'fields': ('card_token',),
+            'fields': ('card_token', 'default_card',),
         }),
         ('Metadata', {
             'fields': ('created_at',),
