@@ -1,9 +1,5 @@
 from django.urls import path
-<<<<<<< HEAD
-from .views import view_account, kyc_view,dashboard
-=======
 from .views import view_account, kyc_view, dashboard, KYCOptionsView, KYCIdentityUploadView
->>>>>>> d08e3f2 (push again)
 
 from django.conf import settings
 from django.conf.urls.static import static
@@ -15,11 +11,8 @@ urlpatterns = [
     
     # KYC endpoints
     path('kyc/', kyc_view, name='kyc'),
-<<<<<<< HEAD
-=======
     path('kyc/options/', KYCOptionsView.as_view(), name='kyc-options'),
     path('kyc/identity/upload/', KYCIdentityUploadView.as_view(), name='kyc-identity-upload'),
->>>>>>> d08e3f2 (push again)
     
 ]
 

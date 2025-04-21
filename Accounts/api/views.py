@@ -10,15 +10,11 @@ from rest_framework.permissions import IsAuthenticated,AllowAny
 from django.core.mail import send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
-<<<<<<< HEAD
-
-
-=======
+from rest_framework import generics  # Import generics from rest_framework
+from rest_framework.views import APIView  # Import APIView
 from django_countries import countries
-from rest_framework.views import APIView
-from rest_framework import generics
-from Accounts.models import IDENTITY_TYPE 
->>>>>>> d08e3f2 (push again)
+from Accounts.models import IDENTITY_TYPE
+
 # -----------------------------------------------------------------------------
 # Account API Endpoint
 # -----------------------------------------------------------------------------
@@ -124,8 +120,6 @@ def kyc_view(request):
 
 
 
-<<<<<<< HEAD
-=======
 # -----------------------------------------------------------------------------
 # KYCOPTIONS VIEW API Endpoint
 # -----------------------------------------------------------------------------
@@ -133,6 +127,10 @@ class KYCOptionsView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        # Access request by logging user info
+        user = request.user
+        print(f"Request made by user: {user}")
+
         options = {
             'identity_types': dict(IDENTITY_TYPE),
             'countries': dict(countries)
@@ -140,7 +138,6 @@ class KYCOptionsView(generics.GenericAPIView):
         return Response(options)
 
 
->>>>>>> d08e3f2 (push again)
 
 # -----------------------------------------------------------------------------
 # KYC IDENTITY VIEW API Endpoint
