@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from userAccount.models import User
 from userAccount.api.serializer import UserSerializer
-from Accounts.api.serializer import AccountSerializer,KYCSerializer
+from Accounts.api.serializer import AccountSerializer,KYCSerializer,KYCIdentityUploadSerializer
 from Accounts.models import Account, KYC
 from rest_framework.decorators import api_view,permission_classes
 from rest_framework.response import Response
@@ -10,8 +10,15 @@ from rest_framework.permissions import IsAuthenticated,AllowAny
 from django.core.mail import send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
+<<<<<<< HEAD
 
 
+=======
+from django_countries import countries
+from rest_framework.views import APIView
+from rest_framework import generics
+from Accounts.models import IDENTITY_TYPE 
+>>>>>>> d08e3f2 (push again)
 # -----------------------------------------------------------------------------
 # Account API Endpoint
 # -----------------------------------------------------------------------------
@@ -115,6 +122,67 @@ def kyc_view(request):
     
 
 
+
+
+<<<<<<< HEAD
+=======
+# -----------------------------------------------------------------------------
+# KYCOPTIONS VIEW API Endpoint
+# -----------------------------------------------------------------------------
+class KYCOptionsView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        options = {
+            'identity_types': dict(IDENTITY_TYPE),
+            'countries': dict(countries)
+        }
+        return Response(options)
+
+
+>>>>>>> d08e3f2 (push again)
+
+# -----------------------------------------------------------------------------
+# KYC IDENTITY VIEW API Endpoint
+# -----------------------------------------------------------------------------
+class KYCIdentityUploadView(APIView):
+    """
+    Handle identity document uploads for KYC verification
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        # Check if user already has a KYC record
+        if hasattr(request.user, 'kyc'):
+            return Response(
+                {"error": "KYC verification already submitted"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        serializer = KYCIdentityUploadSerializer(
+            data=request.data,
+            context={'request': request}
+        )
+        if serializer.is_valid():
+            kyc = serializer.save(user=request.user)
+            
+            # Link to account if exists
+            if hasattr(request.user, 'account'):
+                kyc.account = request.user.account
+                kyc.save()
+            
+            return Response({
+                "status": "success",
+                "message": "Identity documents uploaded successfully",
+                "kyc_id": str(kyc.id),
+                "verification_status": kyc.verification_status
+            }, status=status.HTTP_201_CREATED)
+        
+        return Response({
+            "status": "error",
+            "errors": serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
 
 
 
