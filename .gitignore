@@ -1,0 +1,3 @@
+menv/
+*.pyc
+__pycache__/
