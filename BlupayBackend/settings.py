@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-mxfofi@4b(%_$yj40+yq7op95-)_w*y1es#4)#8p)^^4p1(tk8
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -40,8 +40,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
-
     'userAccount',
     'rest_framework',
     'rest_framework.authtoken',
@@ -67,6 +65,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'allauth.account.middleware.AccountMiddleware',  # <-- Add this line
 ]
 
@@ -141,7 +140,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=300),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=3),
 }
 
@@ -165,7 +164,7 @@ SOCIALACCOUNT_PROVIDERS = {
     },
 }
 SOCIALACCOUNT_STORE_TOKENS = True
-
+CORS_ALLOW_ALL_ORIGINS = True  # <- for development only!
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
