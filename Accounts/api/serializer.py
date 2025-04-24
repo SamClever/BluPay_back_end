@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from userAccount.models import User
 from django_countries.fields import CountryField
-from Accounts.models import Account,KYC
+from Accounts.models import Account,KYC,IDENTITY_TYPE
 
 
 ############################################
@@ -41,7 +41,48 @@ class KYCSerializer(serializers.ModelSerializer):
 
 
 
+
+
+class KYCStep1Serializer(serializers.Serializer):
+    identity_type = serializers.ChoiceField(choices=IDENTITY_TYPE)
+    country       = serializers.CharField(max_length=100)
+
+    def update_kyc(self, user):
+        # get or create their KYC record
+        kyc, _ = KYC.objects.get_or_create(user=user)
+        kyc.identity_type = self.validated_data['identity_type']
+        kyc.country       = self.validated_data['country']
+        kyc.save()
+        return kyc
+
      
+
+
+class KYCStep2Serializer(serializers.ModelSerializer):
+    identity_image = serializers.ImageField(
+        required=True,
+        allow_empty_file=False,   # no zero‐byte uploads
+        use_url=False              # we’ll build the URL in the view
+    )
+    
+    class Meta:
+        model = KYC
+        fields = ['identity_image']
+        extra_kwargs = {
+            'identity_image': {'required': True}
+        }
+
+
+    def validate_identity_image(self, img):
+        # 1) Check file type
+        if img.content_type not in ('image/jpeg', 'image/png'):
+            raise serializers.ValidationError("Only JPEG or PNG allowed.")
+        # 2) Check size (5 MB max)
+        max_size = 5 * 1024 * 1024
+        if img.size > max_size:
+            raise serializers.ValidationError("Image too large (max 5 MB).")
+        return img
+
 
     
 class KYCIdentityUploadSerializer(serializers.ModelSerializer):
@@ -102,6 +143,7 @@ class KYCIdentityUploadSerializer(serializers.ModelSerializer):
             )
         
         return value
+
 
 
 ############################################
