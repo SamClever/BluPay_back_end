@@ -1,17 +1,21 @@
 from django.shortcuts import get_object_or_404
 from userAccount.models import User
 from userAccount.api.serializer import UserSerializer
-from Accounts.api.serializer import AccountSerializer,KYCSerializer
+from Accounts.api.serializer import *
 from Accounts.models import Account, KYC
-from rest_framework.decorators import api_view,permission_classes
+from rest_framework.decorators import api_view,permission_classes,parser_classes
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated,AllowAny
 from django.core.mail import send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
-
-
+from rest_framework import generics  # Import generics from rest_framework
+from rest_framework.views import APIView  # Import APIView
+from django_countries import countries
+from Accounts.models import IDENTITY_TYPE
+import pycountry  # Removed as it is not accessed
 # -----------------------------------------------------------------------------
 # Account API Endpoint
 # -----------------------------------------------------------------------------
@@ -112,9 +116,166 @@ def kyc_view(request):
                 "data": serializer.data
             }, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+# -----------------------------------------------------------------------------
+# KYCOPTIONS VIEW API Endpoint
+# -----------------------------------------------------------------------------
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def kyc_step1(request):
+    """
+    Screen 1 of KYC: choose identity type & country.
+    """
+    if request.method == 'GET':
+        # build the identity‐type choices
+        identity_choices = [
+            {'key': key, 'label': label}
+            for key, label in IDENTITY_TYPE
+        ]
+        # build a simple country list from pycountry
+        countries = [
+            {'code': c.alpha_2, 'name': c.name}
+            for c in pycountry.countries
+        ]
+        return Response({
+            'identity_types': identity_choices,
+            'countries': countries
+        })
+
+    # POST: user has chosen their type & country
+    serializer = KYCStep1Serializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=400)
+
+    kyc = serializer.update_kyc(request.user)
+    return Response({
+        'message': 'thank you for choosing your identity type & country',
+        'kyc': {
+            'identity_type': kyc.identity_type,
+            'country': kyc.country,
+        }
+    }) 
+
+
+
+
+# -----------------------------------------------------------------------------
+# KYC IDENTITY VIEW API Endpoint
+# -----------------------------------------------------------------------------
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser, FormParser])
+def kyc_step2_view(request):
+    """
+    GET:  return current image URL (or null)
+    POST: accept a multipart‐form file under key `identity_image`
+    """
+    kyc = get_object_or_404(KYC, user=request.user)
+
+    if request.method == 'GET':
+        data = {
+            'identity_image_url': (
+                request.build_absolute_uri(kyc.identity_image.url)
+                if kyc.identity_image
+                else None
+            )
+        }
+        return Response(data)
+
+    # POST
+    # ensure the client actually sent a file
+    if 'identity_image' not in request.FILES:
+        return Response(
+            {'error': 'No file provided under "identity_image".'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    serializer = KYCStep2Serializer(kyc, data=request.data, partial=True)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # save will store the file to MEDIA_ROOT and update kyc.identity_image
+    serializer.save()
+
+    # now safe to build the URL
+    url = request.build_absolute_uri(serializer.instance.identity_image.url)
+    return Response(
+        {
+            'message': 'ID-card image uploaded successfully.',
+            'identity_image_url': url
+        },
+        status=status.HTTP_200_OK
+    )
+
+
+
+
+
+
+
+
+# -----------------------------------------------------------------------------
+# KYCOPTIONS VIEW API Endpoint
+# -----------------------------------------------------------------------------
+class KYCOptionsView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        # Access request by logging user info
+        user = request.user
+        print(f"Request made by user: {user}")
+
+        options = {
+            'identity_types': dict(IDENTITY_TYPE),
+            'countries': dict(countries)
+        }
+        return Response(options)
+
+
+
+# -----------------------------------------------------------------------------
+# KYC IDENTITY VIEW API Endpoint
+# -----------------------------------------------------------------------------
+class KYCIdentityUploadView(APIView):
+    """
+    Handle identity document uploads for KYC verification
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        # Check if user already has a KYC record
+        if hasattr(request.user, 'kyc'):
+            return Response(
+                {"error": "KYC verification already submitted"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        serializer = KYCIdentityUploadSerializer(
+            data=request.data,
+            context={'request': request}
+        )
+        if serializer.is_valid():
+            kyc = serializer.save(user=request.user)
+            
+            # Link to account if exists
+            if hasattr(request.user, 'account'):
+                kyc.account = request.user.account
+                kyc.save()
+            
+            return Response({
+                "status": "success",
+                "message": "Identity documents uploaded successfully",
+                "kyc_id": str(kyc.id),
+                "verification_status": kyc.verification_status
+            }, status=status.HTTP_201_CREATED)
+        
+        return Response({
+            "status": "error",
+            "errors": serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
     
-
-
 
 
 
