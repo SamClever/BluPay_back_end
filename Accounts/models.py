@@ -55,6 +55,16 @@ class Account(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     kyc_submitted = models.BooleanField(default=False)
     kyc_confirmed = models.BooleanField(default=False)
+
+
+    # Add these two fields:
+    fingerprint_enabled = models.BooleanField(default=False)
+    fingerprint_secret  = models.CharField(max_length=64, null=True, blank=True)
+
+
+    faceid_enabled = models.BooleanField(default=False)
+    faceid_secret  = models.CharField(max_length=64, null=True, blank=True)
+
     recommended_by = models.ForeignKey(
         User,
         on_delete=models.DO_NOTHING,
@@ -103,12 +113,16 @@ class KYC(models.Model):
         default="default.jpg",
         help_text="A clear picture of your face"
     )
-    face_verification_image = models.ImageField(
+
+    selfie_image = models.ImageField(
         upload_to=user_directory_path, 
         null=True, 
         blank=True,
         help_text="Image used for face verification"
     )
+
+    face_verified     = models.BooleanField(default=False)
+    face_match_score  = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     
 
 
@@ -130,7 +144,7 @@ class KYC(models.Model):
     
     # Contact Details
     mobile = models.CharField(max_length=20)
-    fax = models.CharField(max_length=20, null=True, blank=True)
+    
     
     date = models.DateTimeField(auto_now_add=True)
     
@@ -145,12 +159,12 @@ class KYC(models.Model):
 
 
     def save(self, *args, **kwargs):
-        # Compute biometric hash if face_verification_image is provided
-        if self.face_verification_image:
+        # Compute biometric hash if selfie_image is provided
+        if self.selfie_image:
             try:
                 # Open the image file; ensure the file is read in binary mode.
-                self.face_verification_image.open()
-                data = self.face_verification_image.read()
+                self.selfie_image.open()
+                data = self.selfie_image.read()
                 self.biometric_hash = hashlib.sha256(data).hexdigest()
             except Exception as e:
                 # Optionally, log error or set biometric_hash to None if processing fails

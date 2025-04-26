@@ -1,8 +1,15 @@
 from rest_framework import serializers
 from userAccount.models import User
 from django_countries.fields import CountryField
-from Accounts.models import Account,KYC,IDENTITY_TYPE
+from Accounts.models import Account,KYC,IDENTITY_TYPE,GENDER
+from datetime import date
+from django.utils import timezone
+import re
+import phonenumbers
+import pycountry
+from phonenumbers import COUNTRY_CODE_TO_REGION_CODE, PhoneNumberFormat
 
+PHONE_RE = re.compile(r'^\+?[0-9]{7,15}$')  # very basic E.164‐style check
 
 ############################################
 # KYC Serializer
@@ -21,7 +28,7 @@ class KYCSerializer(serializers.ModelSerializer):
             'identity_type',
             'identity_image',
             'profile_image',
-            'face_verification_image',
+            'selfie_image',
             'biometric_hash',
             'address_line1',
             'address_line2',
@@ -30,7 +37,6 @@ class KYCSerializer(serializers.ModelSerializer):
             'zip_code',
             'country',
             'mobile',
-            'fax',
             'date'
         ]
         read_only_fields = ("biometric_hash", "date")
@@ -64,7 +70,7 @@ class KYCStep2Serializer(serializers.ModelSerializer):
         allow_empty_file=False,   # no zero‐byte uploads
         use_url=False              # we’ll build the URL in the view
     )
-    
+
     class Meta:
         model = KYC
         fields = ['identity_image']
@@ -84,68 +90,224 @@ class KYCStep2Serializer(serializers.ModelSerializer):
         return img
 
 
+
+class KYCStep3Serializer(serializers.ModelSerializer):
+    selfie_image = serializers.ImageField(
+        required=True,
+        allow_empty_file=False,
+        use_url=False
+    )
+
+    class Meta:
+        model = KYC
+        fields = ['selfie_image']
+
+    def validate_selfie_image(self, img):
+        if img.content_type not in ('image/jpeg', 'image/png'):
+            raise serializers.ValidationError("Only JPEG/PNG allowed.")
+        if img.size > 5*1024*1024:
+            raise serializers.ValidationError("Max size is 5 MB.")
+        return img
     
-class KYCIdentityUploadSerializer(serializers.ModelSerializer):
-    country = CountryField()
-    required_documents = serializers.SerializerMethodField()
-    
+
+
+
+class KYCStep4Serializer(serializers.ModelSerializer):
+    gender = serializers.ChoiceField(choices=GENDER)
+    mobile = serializers.CharField()
+
     class Meta:
         model = KYC
         fields = [
-            'identity_image',
-           
+            'First_name', 'Last_name',
+            'date_of_birth', 'gender',
+            'address_line1', 'address_line2',
+            'city', 'state', 'zip_code',
+            'mobile',
         ]
-        read_only_fields = ['id', 'required_documents']
-    
-    def get_required_documents(self, obj):
-        return {
-            'front': True,
-            'back': obj.identity_type in ['national_id_card', 'drivers_license'],
-            'selfie': True
+
+    extra_kwargs = {
+            'gender': {'choices': GENDER}
         }
-    
-    def validate(self, data):
-        identity_type = data.get('identity_type')
-        
-        # Validate back image is required for certain ID types
-        if identity_type in ['national_id_card', 'drivers_license']:
-            if 'identity_document_back' not in data or not data['identity_document_back']:
-                raise serializers.ValidationError(
-                    "Back side of document is required for this ID type"
-                )
-        
-        return data
 
-    def validate_identity_document_front(self, value):
-        return self._validate_image_file(value, "Front side")
+    def validate_date_of_birth(self, date_of_birth):
+        if date_of_birth >= date.today():
+            raise serializers.ValidationError("Date of birth must be in the past.")
+        return date_of_birth
+
+    # def validate(self, attrs):
+    #     cc = attrs.pop('country_code')
+    #     pn = attrs.pop('phone_number').strip()
+    #     full = f'{cc}{pn}'
+
+    #     try:
+    #         num = phonenumbers.parse(full, None)
+    #     except phonenumbers.NumberParseException:
+    #         raise serializers.ValidationError({"phone_number": "Unable to parse phone number."})
+
+    #     if not phonenumbers.is_valid_number(num):
+    #         raise serializers.ValidationError({"phone_number": "Phone number is not valid for the given country code."})
+
+    #     # store in E.164 format
+    #     attrs['mobile'] = phonenumbers.format_number(num, PhoneNumberFormat.E164)
+    #     return super().validate(attrs)
+
+    # def validate_first_name(self, v):
+    #     return v.strip().title()
+
+    # def validate_last_name(self, v):
+    #     return v.strip().title()
+
+    # def validate_zip_code(self, v):
+    #     return v.strip()
+
     
-    def validate_identity_document_back(self, value):
-        if value:  # Only validate if back image is provided
-            return self._validate_image_file(value, "Back side")
-        return value
-    
-    def validate_selfie_with_id(self, value):
-        return self._validate_image_file(value, "Selfie")
-    
-    def _validate_image_file(self, value, field_name):
-        # Validate file size (max 5MB)
-        max_size = 5 * 1024 * 1024
-        if value.size > max_size:
-            raise serializers.ValidationError(
-                f"{field_name} image size must be less than 5MB"
-            )
-        
-        # Validate file type
-        valid_extensions = ['.jpg', '.jpeg', '.png']
-        if not any(value.name.lower().endswith(ext) for ext in valid_extensions):
-            raise serializers.ValidationError(
-                f"{field_name} must be a JPG or PNG image"
-            )
-        
-        return value
 
 
 
+class KYCStep5Serializer(serializers.ModelSerializer):
+    # Build full URLs for the two images
+    identity_image_url = serializers.SerializerMethodField()
+    selfie_image_url   = serializers.SerializerMethodField()
+
+    # Grab the user’s email off the related user object
+    email = serializers.EmailField(source='user.email', read_only=True)
+
+    class Meta:
+        model = KYC
+        fields = [
+            'identity_image_url',
+            'selfie_image_url',
+            'identity_type',
+            'country',
+            'First_name',
+            'Last_name',
+            'date_of_birth',
+            'gender',
+            'address_line1',
+            'address_line2',
+            'city',
+            'state',
+            'zip_code',
+            'mobile',
+            'email',
+        ]
+
+    def get_identity_image_url(self, obj):
+        req = self.context.get('request')
+        if obj.identity_image:
+            return req.build_absolute_uri(obj.identity_image.url)
+        return None
+
+    def get_selfie_image_url(self, obj):
+        req = self.context.get('request')
+        if obj.selfie_image:
+            return req.build_absolute_uri(obj.selfie_image.url)
+        return None
+    
+
+############################################
+# PIN SERIALIZER
+###########################################
+class SetPinSerializer(serializers.Serializer):
+    pin = serializers.CharField(min_length=4, max_length=4)
+
+    def validate_pin(self, pin):
+        if not pin.isdigit():
+            raise serializers.ValidationError("PIN must consist of 4 digits.")
+        return pin
+    
+
+
+
+
+
+############################################
+# FINGERPRINT SERIALIZER
+###########################################
+class EnableFingerprintSerializer(serializers.Serializer):
+    """No inputs—just confirms the user wants to enable fingerprint."""
+    # we return the generated secret in the view
+
+class FingerprintLoginSerializer(serializers.Serializer):
+    fingerprint_secret = serializers.CharField()
+
+
+
+############################################
+# FACEID SERIALIZER
+###########################################
+class EnableFaceIDSerializer(serializers.Serializer):
+    """Nothing to pass in—client just requests to enable Face ID."""
+
+class FaceIDLoginSerializer(serializers.Serializer):
+    faceid_secret = serializers.CharField()
+
+
+
+############################################
+# ACCOUNTACTIVATIONS Serializer
+###########################################
+class AccountActivationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Account
+        fields = [
+            "account_number",
+            "pin_number",
+            "red_code",
+            "account_status",
+        ]
+        read_only_fields = fields
+
+
+
+
+
+
+def get_greeting():
+    hour = timezone.localtime().hour
+    if hour < 12:
+        return "Good Morning"
+    if hour < 18:
+        return "Good Afternoon"
+    return "Good Evening"
+
+class UserProfileSerializer(serializers.Serializer):
+    greeting = serializers.SerializerMethodField()
+    full_name = serializers.SerializerMethodField()
+    profile_image_url = serializers.SerializerMethodField()
+
+    def get_greeting(self, obj):
+        return get_greeting()
+
+    def get_full_name(self, obj):
+        user = obj
+        name = user.get_full_name()
+        return name if name else user.email
+
+    def get_profile_image_url(self, obj):
+        request = self.context['request']
+        try:
+            kyc = KYC.objects.get(user=obj)
+            if kyc.profile_image:
+                return request.build_absolute_uri(kyc.profile_image.url)
+        except KYC.DoesNotExist:
+            pass
+        return None
+
+
+class AccountSummarySerializer(serializers.Serializer):
+    account_number = serializers.CharField(source='account.account_number')
+    balance        = serializers.DecimalField(source='account.account_balance', max_digits=12, decimal_places=2)
+
+
+class DashboardSerializer(serializers.Serializer):
+    user          = UserProfileSerializer(source='*')
+    account       = AccountSummarySerializer(source='*')
+    quick_actions = serializers.ListField(child=serializers.DictField())
+    services      = serializers.ListField(child=serializers.DictField())
+
+    
 ############################################
 # AccountSerializer
 ###########################################

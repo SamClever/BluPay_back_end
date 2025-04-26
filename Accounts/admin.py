@@ -16,10 +16,10 @@ class KYCInline(admin.StackedInline):
             'fields': ('First_name', 'biometric_hash', 'date_of_birth', 'gender', 'identity_type', 'identity_image')
         }),
         ('Contact & Address', {
-            'fields': ('country', 'state', 'city', 'mobile', 'fax')
+            'fields': ('country', 'state', 'city', 'mobile')
         }),
         ('Verification Images', {
-            'fields': ('profile_image', 'face_verification_image')
+            'fields': ('profile_image', 'selfie_image')
         }),
     )
 
@@ -45,7 +45,7 @@ class AccountAdmin(admin.ModelAdmin):
             'fields': ('account_status', 'kyc_submitted', 'kyc_confirmed')
         }),
         ('Additional Info', {
-            'fields': ('recommended_by',)
+            'fields': ('recommended_by', 'fingerprint_enabled', 'fingerprint_secret','faceid_enabled', 'faceid_secret')
         }),
         # Removed 'Metadata' fieldset containing 'date'
     )
@@ -64,9 +64,9 @@ class KYCAdmin(admin.ModelAdmin):
             'fields': ('user', 'account', 'First_name','Last_name', 'profile_image', 'biometric_hash', 'date_of_birth')
         }),
         ('Identification', {
-            'fields': ('gender', 'identity_type', 'identity_image', 'face_verification_image')
+            'fields': ('gender', 'identity_type', 'identity_image', 'selfie_image')
         }),
         ('Address & Contact', {
-            'fields': ('country', 'state', 'city', 'mobile', 'fax')
+            'fields': ('country', 'state', 'city', 'mobile', 'address_line1', 'address_line2', 'zip_code')
         }),
     )

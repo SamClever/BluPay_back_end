@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Your Blupay Account Is Live!</title></head>
+<body>
+  <p>Hi {{ user.get_full_name|default:user.email }},</p>
+  <p>Your Blupay account is now <strong>active</strong> and ready to use!</p>
+  <ul>
+    <li><strong>Account number:</strong> {{ account.account_number }}</li>
+    <li><strong>PIN:</strong> {{ account.pin_number }}</li>
+  </ul>
+  <p>We’re now reviewing your submitted KYC documents and will notify you once they’re fully verified.</p>
+  <p>Thanks for joining Blupay!</p>
+  <p>— The Blupay Team</p>
+</body>
+</html>
