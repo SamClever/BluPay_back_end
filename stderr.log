@@ -1,0 +1,664 @@
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 8: cd: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11: No such file or directory
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 9: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/bin/set_env_vars.py: No such file or directory
+Python path configuration:
+  PYTHONHOME = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  PYTHONPATH = '.:/home/zakejapf/blupay.zakedebt.co.tz/'
+  program name = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  isolated = 0
+  environment = 1
+  user site = 1
+  import site = 1
+  sys._base_executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.base_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.base_exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.platlibdir = 'lib64'
+  sys.executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.path = [
+    '.',
+    '/home/zakejapf/blupay.zakedebt.co.tz/',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python310.zip',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python3.10',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python3.10/lib-dynload',
+  ]
+Fatal Python error: init_fs_encoding: failed to get the Python codec of the filesystem encoding
+Python runtime state: core initialized
+ModuleNotFoundError: No module named 'encodings'
+
+Current thread 0x00007ff589b2c740 (most recent call first):
+  <no Python frame>
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 8: cd: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11: No such file or directory
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 9: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/bin/set_env_vars.py: No such file or directory
+Python path configuration:
+  PYTHONHOME = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  PYTHONPATH = '.:/home/zakejapf/blupay.zakedebt.co.tz/'
+  program name = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  isolated = 0
+  environment = 1
+  user site = 1
+  import site = 1
+  sys._base_executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.base_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.base_exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.platlibdir = 'lib64'
+  sys.executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.path = [
+    '.',
+    '/home/zakejapf/blupay.zakedebt.co.tz/',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python310.zip',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python3.10',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python3.10/lib-dynload',
+  ]
+Fatal Python error: init_fs_encoding: failed to get the Python codec of the filesystem encoding
+Python runtime state: core initialized
+ModuleNotFoundError: No module named 'encodings'
+
+Current thread 0x00007f22750f4740 (most recent call first):
+  <no Python frame>
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 8: cd: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11: No such file or directory
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 9: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/bin/set_env_vars.py: No such file or directory
+Python path configuration:
+  PYTHONHOME = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  PYTHONPATH = '.:/home/zakejapf/blupay.zakedebt.co.tz/'
+  program name = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  isolated = 0
+  environment = 1
+  user site = 1
+  import site = 1
+  sys._base_executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.base_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.base_exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.platlibdir = 'lib64'
+  sys.executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.path = [
+    '.',
+    '/home/zakejapf/blupay.zakedebt.co.tz/',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python310.zip',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python3.10',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python3.10/lib-dynload',
+  ]
+Fatal Python error: init_fs_encoding: failed to get the Python codec of the filesystem encoding
+Python runtime state: core initialized
+ModuleNotFoundError: No module named 'encodings'
+
+Current thread 0x00007fb983acf740 (most recent call first):
+  <no Python frame>
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 8: cd: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11: No such file or directory
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 9: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/bin/set_env_vars.py: No such file or directory
+Python path configuration:
+  PYTHONHOME = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  PYTHONPATH = '.:/home/zakejapf/blupay.zakedebt.co.tz/'
+  program name = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  isolated = 0
+  environment = 1
+  user site = 1
+  import site = 1
+  sys._base_executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.base_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.base_exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.platlibdir = 'lib64'
+  sys.executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.path = [
+    '.',
+    '/home/zakejapf/blupay.zakedebt.co.tz/',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python310.zip',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python3.10',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python3.10/lib-dynload',
+  ]
+Fatal Python error: init_fs_encoding: failed to get the Python codec of the filesystem encoding
+Python runtime state: core initialized
+ModuleNotFoundError: No module named 'encodings'
+
+Current thread 0x00007f3b9c407740 (most recent call first):
+  <no Python frame>
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 8: cd: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10: No such file or directory
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 9: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/set_env_vars.py: No such file or directory
+Python path configuration:
+  PYTHONHOME = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10'
+  PYTHONPATH = '.:/home/zakejapf/blupay.zakedebt.co.tz/'
+  program name = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  isolated = 0
+  environment = 1
+  user site = 1
+  import site = 1
+  sys._base_executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.base_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10'
+  sys.base_exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10'
+  sys.platlibdir = 'lib64'
+  sys.executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10'
+  sys.exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10'
+  sys.path = [
+    '.',
+    '/home/zakejapf/blupay.zakedebt.co.tz/',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/lib64/python310.zip',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/lib64/python3.10',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/lib64/python3.10/lib-dynload',
+  ]
+Fatal Python error: init_fs_encoding: failed to get the Python codec of the filesystem encoding
+Python runtime state: core initialized
+ModuleNotFoundError: No module named 'encodings'
+
+Current thread 0x00007f5dae1c2740 (most recent call first):
+  <no Python frame>
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 8: cd: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10: No such file or directory
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 9: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/set_env_vars.py: No such file or directory
+Python path configuration:
+  PYTHONHOME = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10'
+  PYTHONPATH = '.:/home/zakejapf/blupay.zakedebt.co.tz/'
+  program name = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  isolated = 0
+  environment = 1
+  user site = 1
+  import site = 1
+  sys._base_executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.base_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10'
+  sys.base_exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10'
+  sys.platlibdir = 'lib64'
+  sys.executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10'
+  sys.exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10'
+  sys.path = [
+    '.',
+    '/home/zakejapf/blupay.zakedebt.co.tz/',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/lib64/python310.zip',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/lib64/python3.10',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/lib64/python3.10/lib-dynload',
+  ]
+Fatal Python error: init_fs_encoding: failed to get the Python codec of the filesystem encoding
+Python runtime state: core initialized
+ModuleNotFoundError: No module named 'encodings'
+
+Current thread 0x00007fa05909f740 (most recent call first):
+  <no Python frame>
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 8: cd: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11: No such file or directory
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 9: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/bin/set_env_vars.py: No such file or directory
+Python path configuration:
+  PYTHONHOME = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  PYTHONPATH = '.:/home/zakejapf/blupay.zakedebt.co.tz/'
+  program name = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  isolated = 0
+  environment = 1
+  user site = 1
+  import site = 1
+  sys._base_executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.base_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.base_exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.platlibdir = 'lib64'
+  sys.executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.path = [
+    '.',
+    '/home/zakejapf/blupay.zakedebt.co.tz/',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python310.zip',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python3.10',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python3.10/lib-dynload',
+  ]
+Fatal Python error: init_fs_encoding: failed to get the Python codec of the filesystem encoding
+Python runtime state: core initialized
+ModuleNotFoundError: No module named 'encodings'
+
+Current thread 0x00007f65d34b2740 (most recent call first):
+  <no Python frame>
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 8: cd: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11: No such file or directory
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 9: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/bin/set_env_vars.py: No such file or directory
+Python path configuration:
+  PYTHONHOME = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  PYTHONPATH = '.:/home/zakejapf/blupay.zakedebt.co.tz/'
+  program name = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  isolated = 0
+  environment = 1
+  user site = 1
+  import site = 1
+  sys._base_executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.base_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.base_exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.platlibdir = 'lib64'
+  sys.executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.path = [
+    '.',
+    '/home/zakejapf/blupay.zakedebt.co.tz/',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python310.zip',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python3.10',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python3.10/lib-dynload',
+  ]
+Fatal Python error: init_fs_encoding: failed to get the Python codec of the filesystem encoding
+Python runtime state: core initialized
+ModuleNotFoundError: No module named 'encodings'
+
+Current thread 0x00007fc2a56ee740 (most recent call first):
+  <no Python frame>
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 8: cd: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11: No such file or directory
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 9: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/bin/set_env_vars.py: No such file or directory
+Python path configuration:
+  PYTHONHOME = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  PYTHONPATH = '.:/home/zakejapf/blupay.zakedebt.co.tz/'
+  program name = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  isolated = 0
+  environment = 1
+  user site = 1
+  import site = 1
+  sys._base_executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.base_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.base_exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.platlibdir = 'lib64'
+  sys.executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.path = [
+    '.',
+    '/home/zakejapf/blupay.zakedebt.co.tz/',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python310.zip',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python3.10',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python3.10/lib-dynload',
+  ]
+Fatal Python error: init_fs_encoding: failed to get the Python codec of the filesystem encoding
+Python runtime state: core initialized
+ModuleNotFoundError: No module named 'encodings'
+
+Current thread 0x00007fbf4ed52740 (most recent call first):
+  <no Python frame>
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 8: cd: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11: No such file or directory
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 9: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/bin/set_env_vars.py: No such file or directory
+Python path configuration:
+  PYTHONHOME = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  PYTHONPATH = '.:/home/zakejapf/blupay.zakedebt.co.tz/'
+  program name = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  isolated = 0
+  environment = 1
+  user site = 1
+  import site = 1
+  sys._base_executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.base_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.base_exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.platlibdir = 'lib64'
+  sys.executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.path = [
+    '.',
+    '/home/zakejapf/blupay.zakedebt.co.tz/',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python310.zip',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python3.10',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python3.10/lib-dynload',
+  ]
+Fatal Python error: init_fs_encoding: failed to get the Python codec of the filesystem encoding
+Python runtime state: core initialized
+ModuleNotFoundError: No module named 'encodings'
+
+Current thread 0x00007f33d0609740 (most recent call first):
+  <no Python frame>
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 8: cd: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11: No such file or directory
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 9: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/bin/set_env_vars.py: No such file or directory
+Python path configuration:
+  PYTHONHOME = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  PYTHONPATH = '.:/home/zakejapf/blupay.zakedebt.co.tz/'
+  program name = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  isolated = 0
+  environment = 1
+  user site = 1
+  import site = 1
+  sys._base_executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.base_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.base_exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.platlibdir = 'lib64'
+  sys.executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.path = [
+    '.',
+    '/home/zakejapf/blupay.zakedebt.co.tz/',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python310.zip',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python3.10',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python3.10/lib-dynload',
+  ]
+Fatal Python error: init_fs_encoding: failed to get the Python codec of the filesystem encoding
+Python runtime state: core initialized
+ModuleNotFoundError: No module named 'encodings'
+
+Current thread 0x00007f29963dc740 (most recent call first):
+  <no Python frame>
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 8: cd: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11: No such file or directory
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 9: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/bin/set_env_vars.py: No such file or directory
+Python path configuration:
+  PYTHONHOME = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  PYTHONPATH = '.:/home/zakejapf/blupay.zakedebt.co.tz/'
+  program name = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  isolated = 0
+  environment = 1
+  user site = 1
+  import site = 1
+  sys._base_executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.base_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.base_exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.platlibdir = 'lib64'
+  sys.executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.path = [
+    '.',
+    '/home/zakejapf/blupay.zakedebt.co.tz/',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python310.zip',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python3.10',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python3.10/lib-dynload',
+  ]
+Fatal Python error: init_fs_encoding: failed to get the Python codec of the filesystem encoding
+Python runtime state: core initialized
+ModuleNotFoundError: No module named 'encodings'
+
+Current thread 0x00007f1290ace740 (most recent call first):
+  <no Python frame>
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 8: cd: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11: No such file or directory
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 9: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/bin/set_env_vars.py: No such file or directory
+Python path configuration:
+  PYTHONHOME = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  PYTHONPATH = '.:/home/zakejapf/blupay.zakedebt.co.tz/'
+  program name = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  isolated = 0
+  environment = 1
+  user site = 1
+  import site = 1
+  sys._base_executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.base_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.base_exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.platlibdir = 'lib64'
+  sys.executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.path = [
+    '.',
+    '/home/zakejapf/blupay.zakedebt.co.tz/',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python310.zip',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python3.10',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python3.10/lib-dynload',
+  ]
+Fatal Python error: init_fs_encoding: failed to get the Python codec of the filesystem encoding
+Python runtime state: core initialized
+ModuleNotFoundError: No module named 'encodings'
+
+Current thread 0x00007f38d9a5d740 (most recent call first):
+  <no Python frame>
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 8: cd: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11: No such file or directory
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 9: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/bin/set_env_vars.py: No such file or directory
+Python path configuration:
+  PYTHONHOME = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  PYTHONPATH = '.:/home/zakejapf/blupay.zakedebt.co.tz/'
+  program name = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  isolated = 0
+  environment = 1
+  user site = 1
+  import site = 1
+  sys._base_executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.base_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.base_exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.platlibdir = 'lib64'
+  sys.executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.path = [
+    '.',
+    '/home/zakejapf/blupay.zakedebt.co.tz/',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python310.zip',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python3.10',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python3.10/lib-dynload',
+  ]
+Fatal Python error: init_fs_encoding: failed to get the Python codec of the filesystem encoding
+Python runtime state: core initialized
+ModuleNotFoundError: No module named 'encodings'
+
+Current thread 0x00007f12c6eb8740 (most recent call first):
+  <no Python frame>
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 8: cd: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11: No such file or directory
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 9: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/bin/set_env_vars.py: No such file or directory
+Python path configuration:
+  PYTHONHOME = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  PYTHONPATH = '.:/home/zakejapf/blupay.zakedebt.co.tz/'
+  program name = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  isolated = 0
+  environment = 1
+  user site = 1
+  import site = 1
+  sys._base_executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.base_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.base_exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.platlibdir = 'lib64'
+  sys.executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.path = [
+    '.',
+    '/home/zakejapf/blupay.zakedebt.co.tz/',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python310.zip',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python3.10',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python3.10/lib-dynload',
+  ]
+Fatal Python error: init_fs_encoding: failed to get the Python codec of the filesystem encoding
+Python runtime state: core initialized
+ModuleNotFoundError: No module named 'encodings'
+
+Current thread 0x00007f2ca1da3740 (most recent call first):
+  <no Python frame>
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 8: cd: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11: No such file or directory
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 9: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/bin/set_env_vars.py: No such file or directory
+Python path configuration:
+  PYTHONHOME = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  PYTHONPATH = '.:/home/zakejapf/blupay.zakedebt.co.tz/'
+  program name = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  isolated = 0
+  environment = 1
+  user site = 1
+  import site = 1
+  sys._base_executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.base_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.base_exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.platlibdir = 'lib64'
+  sys.executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.path = [
+    '.',
+    '/home/zakejapf/blupay.zakedebt.co.tz/',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python310.zip',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python3.10',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python3.10/lib-dynload',
+  ]
+Fatal Python error: init_fs_encoding: failed to get the Python codec of the filesystem encoding
+Python runtime state: core initialized
+ModuleNotFoundError: No module named 'encodings'
+
+Current thread 0x00007facd20be740 (most recent call first):
+  <no Python frame>
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 8: cd: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11: No such file or directory
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 9: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/bin/set_env_vars.py: No such file or directory
+Python path configuration:
+  PYTHONHOME = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  PYTHONPATH = '.:/home/zakejapf/blupay.zakedebt.co.tz/'
+  program name = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  isolated = 0
+  environment = 1
+  user site = 1
+  import site = 1
+  sys._base_executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.base_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.base_exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.platlibdir = 'lib64'
+  sys.executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.path = [
+    '.',
+    '/home/zakejapf/blupay.zakedebt.co.tz/',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python310.zip',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python3.10',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python3.10/lib-dynload',
+  ]
+Fatal Python error: init_fs_encoding: failed to get the Python codec of the filesystem encoding
+Python runtime state: core initialized
+ModuleNotFoundError: No module named 'encodings'
+
+Current thread 0x00007fa505725740 (most recent call first):
+  <no Python frame>
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 8: cd: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11: No such file or directory
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 9: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/bin/set_env_vars.py: No such file or directory
+Python path configuration:
+  PYTHONHOME = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  PYTHONPATH = '.:/home/zakejapf/blupay.zakedebt.co.tz/'
+  program name = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  isolated = 0
+  environment = 1
+  user site = 1
+  import site = 1
+  sys._base_executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.base_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.base_exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.platlibdir = 'lib64'
+  sys.executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.path = [
+    '.',
+    '/home/zakejapf/blupay.zakedebt.co.tz/',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python310.zip',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python3.10',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python3.10/lib-dynload',
+  ]
+Fatal Python error: init_fs_encoding: failed to get the Python codec of the filesystem encoding
+Python runtime state: core initialized
+ModuleNotFoundError: No module named 'encodings'
+
+Current thread 0x00007f307fdb7740 (most recent call first):
+  <no Python frame>
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 8: cd: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11: No such file or directory
+/usr/local/lsws/fcgi-bin/lswsgi_wrapper: line 9: /home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/bin/set_env_vars.py: No such file or directory
+Python path configuration:
+  PYTHONHOME = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  PYTHONPATH = '.:/home/zakejapf/blupay.zakedebt.co.tz/'
+  program name = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  isolated = 0
+  environment = 1
+  user site = 1
+  import site = 1
+  sys._base_executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.base_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.base_exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.platlibdir = 'lib64'
+  sys.executable = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.10/bin/python'
+  sys.prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.exec_prefix = '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11'
+  sys.path = [
+    '.',
+    '/home/zakejapf/blupay.zakedebt.co.tz/',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python310.zip',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python3.10',
+    '/home/zakejapf/virtualenv/blupay.zakedebt.co.tz/3.11/lib64/python3.10/lib-dynload',
+  ]
+Fatal Python error: init_fs_encoding: failed to get the Python codec of the filesystem encoding
+Python runtime state: core initialized
+ModuleNotFoundError: No module named 'encodings'
+
+Current thread 0x00007f497e0ca740 (most recent call first):
+  <no Python frame>
+  File "/home/zakejapf/blupay.zakedebt.co.tz/passenger_wsgi.py", line 16
+    from BlupayBackend.wsgi from application
+                            ^^^^
+SyntaxError: invalid syntax
+  File "/home/zakejapf/blupay.zakedebt.co.tz/passenger_wsgi.py", line 16
+    from BlupayBackend.wsgi from application
+                            ^^^^
+SyntaxError: invalid syntax
+  File "/home/zakejapf/blupay.zakedebt.co.tz/passenger_wsgi.py", line 16
+    from BlupayBackend.wsgi from application
+                            ^^^^
+SyntaxError: invalid syntax
+  File "/home/zakejapf/blupay.zakedebt.co.tz/passenger_wsgi.py", line 16
+    from BlupayBackend.wsgi from application
+                            ^^^^
+SyntaxError: invalid syntax
+  File "/home/zakejapf/blupay.zakedebt.co.tz/passenger_wsgi.py", line 16
+    from BlupayBackend.wsgi from application
+                            ^^^^
+SyntaxError: invalid syntax
+  File "/home/zakejapf/blupay.zakedebt.co.tz/passenger_wsgi.py", line 16
+    from BlupayBackend.wsgi from application
+                            ^^^^
+SyntaxError: invalid syntax
+  File "/home/zakejapf/blupay.zakedebt.co.tz/passenger_wsgi.py", line 16
+    from BlupayBackend.wsgi from application
+                            ^^^^
+SyntaxError: invalid syntax
+  File "/home/zakejapf/blupay.zakedebt.co.tz/passenger_wsgi.py", line 16
+    from BlupayBackend.wsgi from application
+                            ^^^^
+SyntaxError: invalid syntax
+  File "/home/zakejapf/blupay.zakedebt.co.tz/passenger_wsgi.py", line 16
+    from BlupayBackend.wsgi from application
+                            ^^^^
+SyntaxError: invalid syntax
+  File "/home/zakejapf/blupay.zakedebt.co.tz/passenger_wsgi.py", line 16
+    from BlupayBackend.wsgi from application
+                            ^^^^
+SyntaxError: invalid syntax
+  File "/home/zakejapf/blupay.zakedebt.co.tz/passenger_wsgi.py", line 16
+    from BlupayBackend.wsgi from application
+                            ^^^^
+SyntaxError: invalid syntax
+  File "/home/zakejapf/blupay.zakedebt.co.tz/passenger_wsgi.py", line 16
+    from BlupayBackend.wsgi from application
+                            ^^^^
+SyntaxError: invalid syntax
+  File "/home/zakejapf/blupay.zakedebt.co.tz/passenger_wsgi.py", line 16
+    from BlupayBackend.wsgi from application
+                            ^^^^
+SyntaxError: invalid syntax
+  File "/home/zakejapf/blupay.zakedebt.co.tz/passenger_wsgi.py", line 16
+    from BlupayBackend.wsgi from application
+                            ^^^^
+SyntaxError: invalid syntax
+  File "/home/zakejapf/blupay.zakedebt.co.tz/passenger_wsgi.py", line 16
+    from BlupayBackend.wsgi from application
+                            ^^^^
+SyntaxError: invalid syntax
+  File "/home/zakejapf/blupay.zakedebt.co.tz/passenger_wsgi.py", line 16
+    from BlupayBackend.wsgi from application
+                            ^^^^
+SyntaxError: invalid syntax
+Not Found: /Accaunts
+Not Found: /favicon.ico
+Not Found: /Account
+Unauthorized: /Account/accounts/
+Not Found: /Account/accoun
+Not Found: /verify-registration-otp/
+Not Found: /verify-registration-otp/
+Method Not Allowed: /userAuth/verify-registration-otp/
+Not Found: /userAuth/verify-registration-otp/
+Method Not Allowed: /userAuth/login/
+Unauthorized: /userAuth/login/
+Method Not Allowed: /userAuth/verify-login-otp/
+Unauthorized: /Account/kyc/step1/
+Bad Request: /Account/kyc/step1/
+Unauthorized: /Account/kyc/step1/
+Unauthorized: /Account/kyc/step1/
+Unauthorized: /Account/kyc/step1/
+Unauthorized: /Account/kyc/step1/
+Unauthorized: /Account/kyc/step1/
+Bad Request: /userAuth/register/
+Not Found: /account/kyc/step1/
+Not Found: /account/kyc/step1/
+Not Found: /account/kyc/step1/
+Bad Request: /userAuth/register/
+Unauthorized: /Account/kyc/step1/
+Bad Request: /userAuth/verify-registration-otp/
+Bad Request: /userAuth/verify-registration-otp/
+Bad Request: /userAuth/verify-registration-otp/
+Bad Request: /userAuth/verify-registration-otp/
+Bad Request: /userAuth/verify-registration-otp/
