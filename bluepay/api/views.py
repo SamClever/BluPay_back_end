@@ -267,7 +267,8 @@ def notification_detail(request, pk):
 def search_account(request):
     """
     POST { "query": "..." }
-      → search by account_number, account_id, first or last name
+     → search by account_number, user.email, kyc.First_name,
+       and only include accounts with kyc_confirmed=True.
     """
     q = request.data.get('query', '').strip()
     if not q:
@@ -276,21 +277,20 @@ def search_account(request):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    accounts = Account.objects.filter(
-        Q(account_number__iexact=q) |
-        Q(account_id__iexact=q)     |
-        Q(user__email__icontains=q)      |
-        Q(kyc__First_name__icontains=q) |
-        Q(kyc__Last_name__icontains=q)
+    qs = Account.objects.filter(
+        Q(account_number__iexact=q)    |
+        Q(user__email__icontains=q)    |
+        Q(kyc__First_name__icontains=q),
+        kyc_confirmed=True
     ).distinct()
 
-    if not accounts.exists():
+    if not qs.exists():
         return Response(
             {"detail": "No matching accounts found."},
             status=status.HTTP_404_NOT_FOUND
         )
 
-    serializer = AccountSearchSerializer(accounts, many=True)
+    serializer = AccountSearchSerializer(qs, many=True, context={'request': request})
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
