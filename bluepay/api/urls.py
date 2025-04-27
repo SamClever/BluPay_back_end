@@ -19,6 +19,9 @@ urlpatterns = [
     path('transfer/initiate/',         initiate_transfer, name='api-initiate-transfer'),
     path('transfer/<str:tx_id>/',      transaction_detail,name='api-transaction-detail'),
     path('transfer/<str:tx_id>/confirm/', confirm_transfer,name='api-confirm-transfer'),
+
+    path('transactions/', transaction_list, name='api-transaction-list'),
+    path('transactions/<str:pk>/', transaction_detail, name='api-transaction-detail'),
     
     
     # VirtualCard endpoints

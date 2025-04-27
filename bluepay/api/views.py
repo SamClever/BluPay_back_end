@@ -31,7 +31,8 @@ from .serializers import (
     TransactionSerializer,
     ConfirmTransferSerializer
 )
-
+from django.core.mail import EmailMultiAlternatives
+from twilio.rest import Client
 
 
 
@@ -46,19 +47,41 @@ def index(request):
 # ---------------------------------------------------------------------
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def transaction_list(request):
-    transactions = Transaction.objects.all()
-    serializer = TransactionSerializer(transactions, many=True)
+    """
+    GET /api/transactions/?type=transfer|request
+    """
+    tx_type = request.query_params.get('type')
+    qs = Transaction.objects.filter(
+        Q(sender=request.user) | Q(reciver=request.user)
+    )
+    if tx_type in ('transfer', 'request'):
+        qs = qs.filter(transaction_type=tx_type)
+    qs = qs.order_by('-date')
+    serializer = TransactionSerializer(qs, many=True)
     return Response(serializer.data)
 
+
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def transaction_detail(request, pk):
+    """
+    GET /api/transactions/{pk}/
+    """
     try:
-        transaction = Transaction.objects.get(pk=pk)
+        tx = Transaction.objects.get(
+            Q(sender=request.user) | Q(reciver=request.user),
+            pk=pk
+        )
     except Transaction.DoesNotExist:
-        return Response({'error': 'Transaction not found'}, status=status.HTTP_404_NOT_FOUND)
-    serializer = TransactionSerializer(transaction)
-    return Response(serializer.data)
+        return Response(
+            {'error': 'Transaction not found'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    serializer = TransactionSerializer(tx)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 
@@ -328,21 +351,94 @@ def transaction_detail(request, tx_id):
     return Response(TransactionSerializer(tx).data)
 
 
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def confirm_transfer(request, tx_id):
     """
     POST /api/transactions/{tx_id}/confirm/ { pin_number }
     """
+    # 1) Lookup transaction
     try:
         tx = Transaction.objects.get(transaction_id=tx_id, user=request.user)
     except Transaction.DoesNotExist:
         return Response({"detail":"Transaction not found."}, status=status.HTTP_404_NOT_FOUND)
 
+    # 2) Validate PIN and status
     serializer = ConfirmTransferSerializer(
         data=request.data,
         context={'request': request, 'transaction': tx}
     )
     serializer.is_valid(raise_exception=True)
+
+    # 3) Finalize transaction
     tx = serializer.save()
+
+    # 4) Prepare context for templates
+    sender    = tx.sender
+    recipient = tx.reciver
+    ctx = {
+        'sender_name'     : f"{sender.get_full_name() or sender.email}",
+        'recipient_name'  : f"{recipient.get_full_name() or recipient.email}",
+        'amount'          : tx.amount,
+        'transaction_id'  : tx.transaction_id,
+        'date'            : tx.date.strftime("%Y-%m-%d %H:%M:%S"),
+    }
+
+    # ────────────────────────────────────────────────────────────
+    # 5A) Send e-mail to SENDER
+    subject = f"You sent {tx.amount} to {ctx['recipient_name']}"
+    text    = render_to_string('emails/transfer_sent.txt', ctx)
+    html    = render_to_string('emails/transfer_sent.html', ctx)
+    mail    = EmailMultiAlternatives(
+                  subject,
+                  text,
+                  settings.DEFAULT_FROM_EMAIL,
+                  [sender.email],
+              )
+    mail.attach_alternative(html, "text/html")
+    mail.send()
+
+    # 5B) Send e-mail to RECEIVER
+    subject = f"You received {tx.amount} from {ctx['sender_name']}"
+    text    = render_to_string('emails/transfer_received.txt', ctx)
+    html    = render_to_string('emails/transfer_received.html', ctx)
+    mail    = EmailMultiAlternatives(
+                  subject,
+                  text,
+                  settings.DEFAULT_FROM_EMAIL,
+                  [recipient.email],
+              )
+    mail.attach_alternative(html, "text/html")
+    mail.send()
+
+    # # ────────────────────────────────────────────────────────────
+    # # 6) Send SMS via Twilio
+    twilio = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+
+    sms_from = settings.TWILIO_PHONE_NUMBER
+    # a) SMS to sender
+    sms_body = (
+        f"You sent {tx.amount} to {ctx['recipient_name']}. "
+        f"TX ID: {tx.transaction_id}"
+    )
+    twilio.messages.create(
+        body=sms_body,
+        from_=sms_from,
+        to=sender.kyc.mobile   # assuming you store E.164 in .mobile
+    )
+
+    # b) SMS to receiver
+    sms_body = (
+        f"You received {tx.amount} from {ctx['sender_name']}. "
+        f"TX ID: {tx.transaction_id}"
+    )
+    twilio.messages.create(
+        body=sms_body,
+        from_=sms_from,
+        to=recipient.kyc.mobile
+    )
+
+    # ────────────────────────────────────────────────────────────
+    # 7) Return the updated transaction back to the client
     return Response(TransactionSerializer(tx).data)

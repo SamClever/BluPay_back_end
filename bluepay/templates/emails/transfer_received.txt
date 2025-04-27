@@ -1,0 +1,7 @@
+Hi {{ recipient_name }},
+
+You’ve received {{ amount }} from {{ sender_name }}.
+Transaction ID: {{ transaction_id }}
+Date: {{ date }}
+
+Thank you for using BluePay!

@@ -14,9 +14,21 @@ from bluepay.models import (
 )
 
 class TransactionSerializer(serializers.ModelSerializer):
+    sender_account_number  = serializers.CharField(source='sender_account.account_number', read_only=True)
+    reciver_account_number = serializers.CharField(source='reciver_account.account_number', read_only=True)
+
     class Meta:
         model = Transaction
-        fields = '__all__'
+        fields = [
+            'transaction_id',
+            'amount',
+            'description',
+            'status',
+            'transaction_type',
+            'sender_account_number',
+            'reciver_account_number',
+            'date',
+        ]
 
 
 
@@ -115,29 +127,47 @@ class InitiateTransferSerializer(serializers.Serializer):
     amount         = serializers.DecimalField(max_digits=12, decimal_places=2)
     description    = serializers.CharField(allow_blank=True, required=False)
 
+    
+
     def validate_account_number(self, value):
+        # load the target Account
         try:
-            return Account.objects.get(
+            acct = Account.objects.get(
                 Q(account_number=value) | Q(account_id=value)
             )
         except Account.DoesNotExist:
-            raise serializers.ValidationError("Account does not exist.")
+            raise serializers.ValidationError("That account does not exist.")
 
-    def validate_amount(self, value):
-        if value <= Decimal('0.00'):
-            raise serializers.ValidationError("Amount must be positive.")
-        return value
+        # must be fully KYC-confirmed & active
+        if not acct.kyc_confirmed:
+            raise serializers.ValidationError("Recipient’s account is not KYC-confirmed.")
+        if acct.account_status != "active":
+            raise serializers.ValidationError("Recipient’s account is not active.")
+        return acct
 
     def validate(self, attrs):
-        recipient_account = attrs['account_number']
-        sender_account = self.context['request'].user.account
+        sender_ac = self.context['request'].user.account
+        recipient_ac = attrs['account_number']
+        amt = attrs['amount']
 
-        if sender_account.account_balance < attrs['amount']:
-            raise serializers.ValidationError("Insufficient funds.")
-        if recipient_account == sender_account:
+        # sender must also be KYC-confirmed & active
+        if not sender_ac.kyc_confirmed:
+            raise serializers.ValidationError("You must complete KYC before transferring.")
+        if sender_ac.account_status != "active":
+            raise serializers.ValidationError("Your account is not active.")
+
+        # no self-transfer
+        if recipient_ac == sender_ac:
             raise serializers.ValidationError("Cannot transfer to your own account.")
-        attrs['recipient_account'] = recipient_account
+
+        # sufficient balance
+        if sender_ac.account_balance < amt:
+            raise serializers.ValidationError("Insufficient funds.")
+
+        attrs['recipient_account'] = recipient_ac
         return attrs
+
+   
 
     def create(self, validated_data):
         user = self.context['request'].user
