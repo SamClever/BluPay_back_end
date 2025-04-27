@@ -7,13 +7,19 @@ from .views import (
     nfcdevice_list, nfcdevice_detail,
     paymenttoken_list, paymenttoken_detail,
     index,
+    search_account,
+    initiate_transfer,
+    confirm_transfer,
 )
 
 urlpatterns = [
     path('', index, name='index'),
    # Transaction endpoints
-    path('transactions/', transaction_list, name='transaction_list'),
-    path('transactions/<uuid:pk>/', transaction_detail, name='transaction_detail'),
+    path('accounts/search/',               search_account,    name='api-search-account'),
+    path('transfer/initiate/',         initiate_transfer, name='api-initiate-transfer'),
+    path('transfer/<str:tx_id>/',      transaction_detail,name='api-transaction-detail'),
+    path('transfer/<str:tx_id>/confirm/', confirm_transfer,name='api-confirm-transfer'),
+    
     
     # VirtualCard endpoints
     path('virtualcards/', virtualcard, name='virtualcard_list'),
