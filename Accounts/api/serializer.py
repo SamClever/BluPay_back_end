@@ -55,7 +55,7 @@ class KYCStep1Serializer(serializers.Serializer):
 
     def create(self, validated_data):
         """
-        Called by ⁠ .save() ⁠ when no instance is passed.
+        Called by serializer.save() when no instance is provided.
         """
         user = self.context['request'].user
         kyc, _ = KYC.objects.get_or_create(user=user)
@@ -66,7 +66,7 @@ class KYCStep1Serializer(serializers.Serializer):
 
     def update(self, instance, validated_data):
         """
-        If you ever want to support PATCH/PUT on an existing KYC.
+        (Optional) If you ever want to PATCH an existing KYC.
         """
         instance.identity_type = validated_data.get('identity_type', instance.identity_type)
         instance.country       = validated_data.get('country',       instance.country)
