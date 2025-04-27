@@ -53,13 +53,25 @@ class KYCStep1Serializer(serializers.Serializer):
     identity_type = serializers.ChoiceField(choices=IDENTITY_TYPE)
     country       = serializers.CharField(max_length=100)
 
-    def update_kyc(self, user):
-        # get or create their KYC record
+    def create(self, validated_data):
+        """
+        Called by ⁠ .save() ⁠ when no instance is passed.
+        """
+        user = self.context['request'].user
         kyc, _ = KYC.objects.get_or_create(user=user)
-        kyc.identity_type = self.validated_data['identity_type']
-        kyc.country       = self.validated_data['country']
+        kyc.identity_type = validated_data['identity_type']
+        kyc.country       = validated_data['country']
         kyc.save()
         return kyc
+
+    def update(self, instance, validated_data):
+        """
+        If you ever want to support PATCH/PUT on an existing KYC.
+        """
+        instance.identity_type = validated_data.get('identity_type', instance.identity_type)
+        instance.country       = validated_data.get('country',       instance.country)
+        instance.save()
+        return instance
 
      
 

@@ -99,8 +99,14 @@ class AccountSearchSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Account
-        fields = ['account_number', 'account_id', 'email', 'account_balance', 'first_name',
-            'last_name',]
+        fields = [
+            'account_number',
+            'account_id',
+            'email',
+            'account_balance',
+            'first_name',
+            'last_name',
+        ]
 
 
 

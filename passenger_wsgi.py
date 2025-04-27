@@ -12,4 +12,5 @@ import sys
 #     response = '\n'.join([message, version])
 #     return [response.encode()]
 
+
 from BlupayBackend.wsgi import application
