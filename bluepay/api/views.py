@@ -8,6 +8,9 @@ from rest_framework.decorators import api_view, permission_classes
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.conf import settings
+from django.db.models import Q
+from decimal import Decimal
+from Accounts.models import *
 from bluepay.models import *
 from bluepay.models import (
     Transaction, 
@@ -18,12 +21,16 @@ from bluepay.models import (
     PaymentToken,
     )
 from .serializers import (
-    TransactionSerializer,
     VirtualCardSerializer,
     PaymentTransactionSerializer,
     NFCDeviceSerializer,
     PaymentTokenSerializer,            
-    NotificationSerializer)
+    NotificationSerializer,
+    AccountSearchSerializer,
+    InitiateTransferSerializer,
+    TransactionSerializer,
+    ConfirmTransferSerializer
+)
 
 
 
@@ -247,3 +254,95 @@ def notification_detail(request, pk):
         return Response({'error': 'Notification not found'}, status=status.HTTP_404_NOT_FOUND)
     serializer = NotificationSerializer(notification)
     return Response(serializer.data)
+
+
+
+
+# ---------------------------------------------------------------------
+# SEARCH API Endpoints
+# ---------------------------------------------------------------------
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def search_account(request):
+    """
+    POST { "query": "..." }
+      → search by account_number, account_id, first or last name
+    """
+    q = request.data.get('query', '').strip()
+    if not q:
+        return Response(
+            {"detail": "Please provide a non-empty search query."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    accounts = Account.objects.filter(
+        Q(account_number__iexact=q) |
+        Q(account_id__iexact=q)     |
+        Q(user__email__icontains=q)      |
+        Q(kyc__First_name__icontains=q) |
+        Q(kyc__Last_name__icontains=q)
+    ).distinct()
+
+    if not accounts.exists():
+        return Response(
+            {"detail": "No matching accounts found."},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    serializer = AccountSearchSerializer(accounts, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+
+# ---------------------------------------------------------------------
+# TRANSFER API Endpoints
+# ---------------------------------------------------------------------
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def initiate_transfer(request):
+    """
+    POST { account_number, amount, description? } → creates TX with status="processing"
+    """
+    serializer = InitiateTransferSerializer(data=request.data, context={'request': request})
+    serializer.is_valid(raise_exception=True)
+    tx = serializer.save()
+    return Response(
+        TransactionSerializer(tx).data,
+        status=status.HTTP_201_CREATED
+    )
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def transaction_detail(request, tx_id):
+    """
+    GET /api/transactions/{tx_id}/
+    """
+    try:
+        tx = Transaction.objects.get(transaction_id=tx_id, user=request.user)
+    except Transaction.DoesNotExist:
+        return Response({"detail":"Not found."}, status=status.HTTP_404_NOT_FOUND)
+    return Response(TransactionSerializer(tx).data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def confirm_transfer(request, tx_id):
+    """
+    POST /api/transactions/{tx_id}/confirm/ { pin_number }
+    """
+    try:
+        tx = Transaction.objects.get(transaction_id=tx_id, user=request.user)
+    except Transaction.DoesNotExist:
+        return Response({"detail":"Transaction not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = ConfirmTransferSerializer(
+        data=request.data,
+        context={'request': request, 'transaction': tx}
+    )
+    serializer.is_valid(raise_exception=True)
+    tx = serializer.save()
+    return Response(TransactionSerializer(tx).data)
