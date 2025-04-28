@@ -10,14 +10,14 @@ from .models import (
 
 @admin.register(Transaction)
 class TransactionAdmin(admin.ModelAdmin):
-    list_display = ['user', 'transaction_id', 'amount', 'status', 'transaction_type','reciver', 'sender']
+    list_display = ['user', 'transaction_id', 'currency_code', 'amount', 'status', 'transaction_type','reciver', 'sender']
     list_filter = ('status', 'transaction_type', 'date')
     search_fields = ('transaction_id', 'user__username', 'description')
     readonly_fields = ('transaction_id', 'date')
     ordering = ('-date',)
     fieldsets = (
         ('General Information', {
-            'fields': ('transaction_id', 'user', 'amount', 'description', 'status', 'transaction_type')
+            'fields': ('transaction_id', 'user', 'currency_code', 'amount', 'description', 'status', 'transaction_type')
         }),
         ('Sender/Receiver Details', {
             'fields': ('sender', 'reciver', 'sender_account', 'reciver_account')

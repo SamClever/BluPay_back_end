@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Payment Request Receipt</title>
+    <style>
+      body { font-family: sans-serif; color: #333; margin: 0; padding: 0; }
+      .container { width: 640px; margin: auto; padding: 20px; }
+      .header { text-align: center; padding-bottom: 20px; }
+      .header h1 { margin: 0; }
+      .details { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+      .details th, .details td {
+        padding: 8px; border: 1px solid #ddd; text-align: left;
+      }
+      .details th { background: #f7f7f7; width: 200px; }
+      .footer { text-align: center; font-size: 0.8em; color: #666; }
+      @media (max-width: 480px) {
+        .container { width: 100%; padding: 10px; }
+        .details th, .details td { padding: 6px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Payment Request Receipt</h1>
+        <p>Request ID: {{ tx.transaction_id }}</p>
+      </div>
+
+      <table class="details">
+        <tr>
+          <th>Date</th>
+          <td>{{ now|date:"b d, Y | H:i:s A" }}</td>
+        </tr>
+        <tr>
+          <th>Status</th>
+          <td>{{ tx.status|capfirst }}</td>
+        </tr>
+        <tr>
+          <th>From</th>
+          <td>{{ tx.sender.kyc.First_name }} {{ tx.sender.kyc.Last_name }}</td>
+        </tr>
+        <tr>
+          <th>From Acct #</th>
+          <td>{{ tx.sender_account.account_number }}</td>
+        </tr>
+        <tr>
+          <th>To</th>
+          <td>{{ tx.reciver.kyc.First_name }} {{ tx.reciver.kyc.Last_name }}</td>
+        </tr>
+        <tr>
+          <th>To Acct #</th>
+          <td>{{ tx.reciver_account.account_number }}</td>
+        </tr>
+        <tr>
+          <th>Amount</th>
+          <td>{{ tx_formatted_amount }}</td>
+        </tr>
+        <tr>
+          <th>Description</th>
+          <td>{{ tx.description|default:"(no description)" }}</td>
+        </tr>
+      </table>
+
+      <div class="footer">
+        <p>Thank you for using TheBlupay.</p>
+      </div>
+    </div>
+  </body>
+</html>

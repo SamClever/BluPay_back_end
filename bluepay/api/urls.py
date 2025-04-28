@@ -10,6 +10,10 @@ from .views import (
     search_account,
     initiate_transfer,
     confirm_transfer,
+    download_receipt,
+
+    initiate_request,
+    download_request_receipt
 )
 
 urlpatterns = [
@@ -19,9 +23,21 @@ urlpatterns = [
     path('transfer/initiate/',         initiate_transfer, name='api-initiate-transfer'),
     path('transfer/<str:tx_id>/',      transaction_detail,name='api-transaction-detail'),
     path('transfer/<str:tx_id>/confirm/', confirm_transfer,name='api-confirm-transfer'),
-
     path('transactions/', transaction_list, name='api-transaction-list'),
-    path('transactions/<str:pk>/', transaction_detail, name='api-transaction-detail'),
+    path('transactions/<str:tx_id>/', transaction_detail, name='transaction-detail'),
+    path(
+        'transactions/<str:tx_id>/receipt/download/',
+        download_receipt,
+        name='download_receipt'
+    ),
+
+
+
+    # Request endpoints
+    path("requests/",         initiate_request,        name="initiate-request"),
+    path("requests/<str:tx_id>/receipt/",
+        download_request_receipt,
+         name="download-request-receipt"),
     
     
     # VirtualCard endpoints

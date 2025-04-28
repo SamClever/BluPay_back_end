@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>New Payment Request</title>
+    <style>
+      body { font-family: sans-serif; color: #333; padding: 20px; }
+      .card { max-width: 600px; margin: auto; border: 1px solid #e1e1e1; border-radius: 8px; overflow: hidden; }
+      .header { background: #005b96; color: white; padding: 16px; text-align: center; }
+      .content { padding: 20px; }
+      .row { margin-bottom: 12px; }
+      .label { font-weight: bold; }
+      .btn { display: inline-block; padding: 12px 20px; background: #005b96; color: white; text-decoration: none; border-radius: 4px; }
+      @media (max-width: 480px) {
+        body { padding: 10px; }
+        .content { padding: 12px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="header">
+        <h1>New Payment Request</h1>
+      </div>
+      <div class="content">
+        <p>Hi {{ receiver_name }},</p>
+        <div class="row"><span class="label">Amount:</span> {{ formatted_amount }}</div>
+        <div class="row"><span class="label">From:</span> {{ sender_name }} (Acct: {{ sender_account_number }})</div>
+        <div class="row"><span class="label">Description:</span> {{ tx.description|default:"(no description)" }}</div>
+        <div class="row"><span class="label">Date:</span> {{ date }}</div>
+        <div class="row"><span class="label">Request ID:</span> {{ tx.transaction_id }}</div>
+        <p>
+          <a href="{{ settings.SITE_URL }}/payments/requests/{{ tx.transaction_id }}/" class="btn">
+            View &amp; Settle Request
+          </a>
+        </p>
+        <hr>
+        <p style="font-size:0.9em; color:#666;">
+          If you didn’t expect this, please contact our support team.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

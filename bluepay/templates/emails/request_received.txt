@@ -1,0 +1,15 @@
+Hi {{ receiver_name }},
+
+You have received a new payment request:
+
+  • Amount:      {{ formatted_amount }}
+  • From:        {{ sender_name }} (Acct: {{ sender_account_number }})
+  • Description: {{ tx.description|default:"(no description)" }}
+  • Date:        {{ tx.date|date:"b d, Y H:i:s" }}
+  • Request ID:  {{ tx.transaction_id }}
+
+To view or settle this request, log in to your dashboard:
+{{ settings.SITE_URL }}/payments/requests/{{ tx.transaction_id }}/
+
+Thank you,
+TheBlupay Team

@@ -99,6 +99,14 @@ PAYMENT_TRANSACTION_STATUS_CHOICES = (
 )
 
 
+CURRENCY_CHOICES = [
+    ('USD', 'US Dollar'),
+    ('TZS', 'Tanzanian Shilling'),
+    # ('EUR', 'Euro'),
+    # ('GBP', 'British Pound'),
+]
+
+
 # -----------------------------------------------------------------------------
 # Models
 # -----------------------------------------------------------------------------
@@ -108,6 +116,13 @@ class Transaction(models.Model):
     transaction_id = ShortUUIDField(unique=True, length=15, max_length=20, prefix="TRN")
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="user")
     amount = models.DecimalField(max_digits=12, decimal_places=2,default=0.00)
+    currency_code = models.CharField(
+        max_length=3,
+        choices=CURRENCY_CHOICES,
+        default='TZS',
+        help_text="ISO 4217 currency code"
+    )
+
     description = models.CharField(max_length=1000, null=True, blank=True)
 
     reciver = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="reciver")

@@ -2,7 +2,10 @@ from rest_framework import serializers
 from .utils import validate_card_number, mask_card_number, detect_card_type, validate_expiration_date
 from django.db.models import Q
 from decimal import Decimal
-from Accounts.models import *
+from django.utils.translation import get_language
+from Accounts.models import * 
+import babel
+from babel.numbers import format_currency
 
 from bluepay.models import (
     Transaction, 
@@ -11,24 +14,43 @@ from bluepay.models import (
     PaymentTransaction,
     NFCDevice,
     PaymentToken,
+    CURRENCY_CHOICES
 )
 
 class TransactionSerializer(serializers.ModelSerializer):
-    sender_account_number  = serializers.CharField(source='sender_account.account_number', read_only=True)
-    reciver_account_number = serializers.CharField(source='reciver_account.account_number', read_only=True)
+    sender_name       = serializers.SerializerMethodField()
+    recipient_name    = serializers.SerializerMethodField()
+    currency_code     = serializers.CharField(source='currency_code')
+    formatted_amount  = serializers.SerializerMethodField()
+    date              = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
 
+    
     class Meta:
         model = Transaction
         fields = [
             'transaction_id',
             'amount',
+            'formatted_amount',
+            'currency_code',
             'description',
             'status',
             'transaction_type',
-            'sender_account_number',
-            'reciver_account_number',
+            'sender_name',
+            'recipient_name',
             'date',
         ]
+
+    def get_sender_name(self, tx):
+        u = tx.sender
+        return u.get_full_name() or u.email
+
+    def get_recipient_name(self, tx):
+        u = tx.reciver
+        return u.get_full_name() or u.email
+
+    def get_formatted_amount(self, tx):
+        # e.g. "$1,234.56" or "TZS 1,234.56"
+        return format_currency(tx.amount, tx.currency_code, locale=get_language())
 
 
 
@@ -125,6 +147,7 @@ class AccountSearchSerializer(serializers.ModelSerializer):
 class InitiateTransferSerializer(serializers.Serializer):
     account_number = serializers.CharField()
     amount         = serializers.DecimalField(max_digits=12, decimal_places=2)
+    currency_code  = serializers.ChoiceField(choices=CURRENCY_CHOICES, default='TZS')
     description    = serializers.CharField(allow_blank=True, required=False)
 
     
@@ -174,6 +197,7 @@ class InitiateTransferSerializer(serializers.Serializer):
         tx = Transaction.objects.create(
             user=user,
             amount=validated_data['amount'],
+            currency_code    = validated_data['currency_code'],   # ← store it
             description=validated_data.get('description', ''),
             sender=user,
             reciver=validated_data['recipient_account'].user,
@@ -185,21 +209,97 @@ class InitiateTransferSerializer(serializers.Serializer):
         return tx
 
 
+SYMBOLS = {'TZS': 'TSh', 'USD':'$'}
+
+
 class TransactionSerializer(serializers.ModelSerializer):
     sender_account_number   = serializers.CharField(source='sender_account.account_number', read_only=True)
     reciver_account_number  = serializers.CharField(source='reciver_account.account_number', read_only=True)
+
+    sender_name             = serializers.SerializerMethodField()
+    sender_profile_image    = serializers.SerializerMethodField()
+
+    receiver_name           = serializers.SerializerMethodField()
+    receiver_profile_image  = serializers.SerializerMethodField()
+    
+    date                   = serializers.DateTimeField(
+                                format="%b %d, %Y | %I:%M:%S %p",
+                                read_only=True
+                            )
+  
+
+
+    currency_code    = serializers.CharField(read_only=True)
+    formatted_amount = serializers.SerializerMethodField()
+
+    
     class Meta:
-        model = Transaction
+        model  = Transaction
         fields = [
             'transaction_id',
             'amount',
+            'currency_code',
+            'formatted_amount',
             'description',
             'status',
-            'transaction_type',
+            'sender_name',
+            'sender_profile_image',
+            'receiver_name',
+            'receiver_profile_image',
             'sender_account_number',
             'reciver_account_number',
             'date',
         ]
+
+    def get_sender_name(self, obj):
+        k = getattr(obj.sender, 'kyc', None)
+        if k:
+            return f"{k.First_name} {k.Last_name or ''}".strip()
+        return obj.sender.email
+
+    def get_receiver_name(self, obj):
+        k = getattr(obj.reciver, 'kyc', None)
+        if k:
+            return f"{k.First_name} {k.Last_name or ''}".strip()
+        return obj.reciver.email
+
+    def _build_image_url(self, image_field):
+        if not image_field:
+            return None
+        request = self.context.get('request')
+        return request.build_absolute_uri(image_field.url)
+
+    def get_sender_profile_image(self, obj):
+        k = getattr(obj.sender, 'kyc', None)
+        return self._build_image_url(k.profile_image) if k else None
+
+    def get_receiver_profile_image(self, obj):
+        k = getattr(obj.reciver, 'kyc', None)
+        return self._build_image_url(k.profile_image) if k else None
+
+    def get_formatted_amount(self, obj):
+        locale = self.context.get('locale', 'en_US')
+        try:
+            return babel.numbers.format_currency(
+                obj.amount, obj.currency_code, locale=locale
+            )
+        except:
+            return f"{obj.amount} {obj.currency_code}"
+
+    def get_receiver_profile_photo(self, obj):
+        photo = getattr(obj.reciver.kyc, 'profile_photo', None)
+        if photo and hasattr(photo, 'url'):
+            request = self.context.get('request')
+            return request.build_absolute_uri(photo.url)
+        return None
+    
+
+    
+
+    # def get_formatted_amount(self, tx):
+    #     sym = SYMBOLS.get(tx.currency_code, tx.currency_code+' ')
+    #     # comma thousands, two decimal places
+    #     return f"{sym} {tx.amount:,.2f}"
 
 
 class ConfirmTransferSerializer(serializers.Serializer):
@@ -251,4 +351,57 @@ class ConfirmTransferSerializer(serializers.Serializer):
             amount=tx.amount
         )
 
+        return tx
+    
+
+
+
+
+class InitiateRequestSerializer(serializers.Serializer):
+    account_number = serializers.CharField()
+    amount         = serializers.DecimalField(max_digits=12, decimal_places=2)
+    description    = serializers.CharField(required=False, allow_blank=True)
+
+    def validate_account_number(self, value):
+        # look up the recipient account
+        try:
+            acct = Account.objects.get(
+                Q(account_number=value) | Q(account_id=value)
+            )
+        except Account.DoesNotExist:
+            raise serializers.ValidationError("That account does not exist.")
+        if not acct.kyc_confirmed:
+            raise serializers.ValidationError("Recipient’s account is not KYC-confirmed.")
+        if acct.account_status != "active":
+            raise serializers.ValidationError("Recipient’s account is not active.")
+        return acct
+
+    def validate(self, attrs):
+        sender_ac = self.context['request'].user.account
+        recipient_ac = attrs['account_number']
+        # sender must be KYC-confirmed & active
+        if not sender_ac.kyc_confirmed:
+            raise serializers.ValidationError("You must complete KYC before requesting payment.")
+        if sender_ac.account_status != "active":
+            raise serializers.ValidationError("Your account is not active.")
+        # no self-request
+        if recipient_ac == sender_ac:
+            raise serializers.ValidationError("Cannot request payment from yourself.")
+        return attrs
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        recipient_acct = validated_data['account_number']
+        tx = Transaction.objects.create(
+            user=user,
+            amount=validated_data['amount'],
+            currency_code=user.account.country_currency_code,  # or however you derive default
+            description=validated_data.get('description', ''),
+            sender=user,
+            reciver=recipient_acct.user,
+            sender_account=user.account,
+            reciver_account=recipient_acct,
+            transaction_type="request",
+            status="processing",
+        )
         return tx

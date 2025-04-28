@@ -10,6 +10,7 @@ from django.template.loader import render_to_string
 from django.conf import settings
 from django.db.models import Q
 from decimal import Decimal
+from django.utils import timezone
 from Accounts.models import *
 from bluepay.models import *
 from bluepay.models import (
@@ -29,11 +30,17 @@ from .serializers import (
     AccountSearchSerializer,
     InitiateTransferSerializer,
     TransactionSerializer,
-    ConfirmTransferSerializer
+    ConfirmTransferSerializer,
+    InitiateRequestSerializer
 )
 from django.core.mail import EmailMultiAlternatives
 from twilio.rest import Client
-
+from django.utils.translation import get_language
+from weasyprint import HTML
+from django.http import HttpResponse
+from io import BytesIO
+import babel.numbers
+from xhtml2pdf import pisa
 
 
 def index(request):
@@ -59,29 +66,27 @@ def transaction_list(request):
     if tx_type in ('transfer', 'request'):
         qs = qs.filter(transaction_type=tx_type)
     qs = qs.order_by('-date')
-    serializer = TransactionSerializer(qs, many=True)
+    serializer = TransactionSerializer(qs, many=True,
+        context={'request': request, 'locale': request.LANGUAGE_CODE})
     return Response(serializer.data)
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def transaction_detail(request, pk):
+def transaction_detail(request, tx_id):
     """
-    GET /api/transactions/{pk}/
+    GET /transactions/{transaction_id}/
     """
     try:
         tx = Transaction.objects.get(
-            Q(sender=request.user) | Q(reciver=request.user),
-            pk=pk
+            Q(transaction_id=tx_id),
+            Q(sender=request.user) | Q(reciver=request.user)
         )
     except Transaction.DoesNotExist:
-        return Response(
-            {'error': 'Transaction not found'},
-            status=status.HTTP_404_NOT_FOUND
-        )
+        return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-    serializer = TransactionSerializer(tx)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    serializer = TransactionSerializer(tx, context={'request': request, 'locale': request.LANGUAGE_CODE})
+    return Response(serializer.data)
 
 
 
@@ -332,10 +337,11 @@ def initiate_transfer(request):
     serializer = InitiateTransferSerializer(data=request.data, context={'request': request})
     serializer.is_valid(raise_exception=True)
     tx = serializer.save()
-    return Response(
-        TransactionSerializer(tx).data,
-        status=status.HTTP_201_CREATED
+    out = TransactionSerializer(
+        tx,
+        context={'request': request, 'locale': get_language()}
     )
+    return Response(out.data, status=201)
 
 
 @api_view(['GET'])
@@ -345,10 +351,10 @@ def transaction_detail(request, tx_id):
     GET /api/transactions/{tx_id}/
     """
     try:
-        tx = Transaction.objects.get(transaction_id=tx_id, user=request.user)
+        tx = Transaction.objects.get(transaction_id=tx_id, user=request.user,)
     except Transaction.DoesNotExist:
         return Response({"detail":"Not found."}, status=status.HTTP_404_NOT_FOUND)
-    return Response(TransactionSerializer(tx).data)
+    return Response(TransactionSerializer(tx, context={'request': request, 'locale': request.LANGUAGE_CODE}).data)
 
 
 
@@ -373,6 +379,11 @@ def confirm_transfer(request, tx_id):
 
     # 3) Finalize transaction
     tx = serializer.save()
+
+    out = TransactionSerializer(
+        tx,
+        context={'request': request, 'locale': request.LANGUAGE_CODE}
+    )
 
     # 4) Prepare context for templates
     sender    = tx.sender
@@ -441,4 +452,138 @@ def confirm_transfer(request, tx_id):
 
     # ────────────────────────────────────────────────────────────
     # 7) Return the updated transaction back to the client
-    return Response(TransactionSerializer(tx).data)
+    return Response(out.data)
+
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def download_receipt(request, tx_id):
+    # 1) Fetch & authorize
+    try:
+        tx = Transaction.objects.get(
+            Q(transaction_id=tx_id),
+            Q(sender=request.user) | Q(reciver=request.user)
+        )
+    except Transaction.DoesNotExist:
+        return Response({"detail": "Not found."}, status=404)
+
+    # 2) Serialize for template context
+    serializer = TransactionSerializer(
+        tx,
+        context={'request': request, 'locale': request.LANGUAGE_CODE}
+    )
+    data = serializer.data
+
+    # 3) Render HTML
+    html_string = render_to_string('receipt.html', {'transaction': data})
+
+    # 4) Convert to PDF
+    pdf_file = HTML(string=html_string).write_pdf()
+
+    # 5) Return as attachment
+    resp = HttpResponse(pdf_file, content_type='application/pdf')
+    resp['Content-Disposition'] = (
+        f'attachment; filename="receipt_{tx.transaction_id}.pdf"'
+    )
+    return resp
+
+
+# ---------------------------------------------------------------------
+# PAYMENT REQUEST API Endpoints
+# ---------------------------------------------------------------------
+def _send_request_notifications(tx):
+    sender    = tx.sender
+    receiver  = tx.reciver
+    ctx = {
+        "tx": tx,
+        "formatted_amount": babel.numbers.format_currency(
+            tx.amount, tx.currency_code, sender.account.user.profile.locale.replace("-", "_")
+        ) if hasattr(settings, "USE_BABEL") else f"{tx.amount} {tx.currency_code}",
+        "date": tx.date.strftime("%b %d, %Y | %I:%M:%S %p"),
+        "sender_name": f"{sender.kyc.First_name} {sender.kyc.Last_name or ''}",
+        "receiver_name": f"{receiver.kyc.First_name} {receiver.kyc.Last_name or ''}",
+    }
+
+    # --- Email to RECEIVER ---
+    subject = f"You have a new payment request of {ctx['formatted_amount']}"
+    text    = render_to_string("emails/request_received.txt", ctx)
+    html    = render_to_string("emails/request_received.html", ctx)
+    mail    = EmailMultiAlternatives(subject, text, settings.DEFAULT_FROM_EMAIL, [receiver.email])
+    mail.attach_alternative(html, "text/html")
+    mail.send()
+
+    # --- Email to SENDER ---
+    subject = f"Your payment request to {ctx['receiver_name']} was sent"
+    text    = render_to_string("emails/request_sent.txt", ctx)
+    html    = render_to_string("emails/request_sent.html", ctx)
+    mail    = EmailMultiAlternatives(subject, text, settings.DEFAULT_FROM_EMAIL, [sender.email])
+    mail.attach_alternative(html, "text/html")
+    mail.send()
+
+    # --- SMS via Twilio ---
+    tw = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+    sms_from = settings.TWILIO_PHONE_NUMBER
+
+    # to receiver
+    body = f"{sender.kyc.First_name} requests {ctx['formatted_amount']} from you. TX ID: {tx.transaction_id}"
+    tw.messages.create(body=body, from_=sms_from, to=receiver.kyc.mobile)
+
+    # to sender
+    body = f"Your request for {ctx['formatted_amount']} to {ctx['receiver_name']} has been sent. TX ID: {tx.transaction_id}"
+    tw.messages.create(body=body, from_=sms_from, to=sender.kyc.mobile)
+
+
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def initiate_request(request):
+    """
+    POST /api/requests/  → creates TX of type=request & status=processing
+    """
+    serializer = InitiateRequestSerializer(data=request.data, context={'request': request})
+    serializer.is_valid(raise_exception=True)
+    tx = serializer.save()
+    _send_request_notifications(tx)
+    out = TransactionSerializer(tx, context={'request': request})
+    return Response(out.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def download_request_receipt(request, tx_id):
+    """
+    GET /api/requests/{tx_id}/receipt/  → application/pdf
+    """
+    tx = Transaction.objects.select_related(
+        'sender__kyc','reciver__kyc','sender_account','reciver_account'
+    ).filter(
+        transaction_id=tx_id,
+        transaction_type="request"
+    ).filter(
+        Q(sender=request.user) | Q(reciver=request.user)
+    ).first()
+    if not tx:
+        return Response({"detail":"Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    # format amount
+    try:
+        locale = request.LANGUAGE_CODE.replace("-", "_")
+        formatted = babel.numbers.format_currency(tx.amount, tx.currency_code, locale=locale)
+    except:
+        formatted = f"{tx.amount} {tx.currency_code}"
+
+    html = render_to_string("request_receipt.html", {
+        "tx": tx,
+        "tx_formatted_amount": formatted,
+        "now": timezone.now(),
+    })
+
+    buf = BytesIO()
+    if pisa.CreatePDF(html, dest=buf).err:
+        return HttpResponse("PDF generation error", status=500)
+    buf.seek(0)
+    resp = HttpResponse(buf, content_type="application/pdf")
+    resp["Content-Disposition"] = f'attachment; filename="request_{tx.transaction_id}.pdf"'
+    return resp
