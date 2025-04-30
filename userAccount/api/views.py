@@ -1,6 +1,6 @@
 
 from userAccount.models import User,OTPVerification
-from userAccount.api.serializer import UserSerializer,UserRegistrationSerializer
+from userAccount.api.serializer import UserSerializer,UserRegistrationSerializer,DeactivationReasonSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from Accounts.models import KYC
@@ -28,7 +28,12 @@ from django.template.loader import render_to_string
 from django.contrib.auth.password_validation import validate_password
 from rest_framework.exceptions import ValidationError
 import requests
-
+from django.utils.timezone import now,localtime
+from django.core.mail import EmailMultiAlternatives
+from django.contrib.sites.shortcuts import get_current_site
+import socket
+import pytz
+from rest_framework.views import APIView
 
 User = get_user_model()
 
@@ -136,9 +141,43 @@ def verify_login_otp(request):
         return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
     
     otp_record = user.otp_verifications.filter(otp_code=otp_code, purpose='login', verified=False).first()
+
     if otp_record:
         otp_record.verified = True
         otp_record.save()
+
+        # Update last_login
+        user.last_login = now()
+        user.save()
+
+        # Get IP and device
+        user_ip = request.META.get('HTTP_X_FORWARDED_FOR') or request.META.get('REMOTE_ADDR')
+        device_name = socket.gethostname()
+
+        # Get user's timezone (default fallback to UTC if not set)
+        user_timezone = getattr(user, 'timezone', 'UTC')
+        tz = pytz.timezone(user_timezone)
+        login_time = localtime(now(), tz).strftime('%Y-%m-%d %H:%M:%S %Z')
+
+        current_site = get_current_site(request)
+
+        subject = "New Login Detected"
+
+        context = {
+            'user': user,
+            'site_name': current_site.name,
+            'login_time': login_time,
+            'ip_address': user_ip,
+            'device': device_name,
+        }
+        html_content = render_to_string('emails/login_detected.html', context)
+        text_content = f"Hello {user.get_full_name()},\n\nWe detected a new login to your account at {login_time} from device {device_name} and IP {user_ip}."
+
+        # Send email
+        email_msg = EmailMultiAlternatives(subject, text_content, settings.DEFAULT_FROM_EMAIL, [user.email])
+        email_msg.attach_alternative(html_content, "text/html")
+        email_msg.send()
+
         # Issue JWT tokens (for example, using djangorestframework-simplejwt)
         refresh = RefreshToken.for_user(user)
         access_token = str(refresh.access_token)
@@ -419,6 +458,34 @@ def google_login(request):
 
 
 
+
+
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            refresh_token = request.data["refresh"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()  # Requires blacklist app enabled
+            return Response({"detail": "Logout successful."}, status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class DeactivateAccountView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = DeactivationReasonSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            request.user.is_active = False
+            request.user.save()
+            return Response({"detail": "Account Deleted  successfully."})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 
 
 @api_view(['GET'])

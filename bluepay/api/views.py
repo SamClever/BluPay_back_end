@@ -1,16 +1,21 @@
 from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, throttling, permissions
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework import permissions, generics
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.db.models import Q
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
+from rest_framework.decorators import action
+from django.contrib.auth import authenticate
+import decimal
 from django.utils import timezone
+from datetime import timedelta
 from Accounts.models import *
 from bluepay.models import *
 from bluepay.models import (
@@ -27,11 +32,19 @@ from .serializers import (
     NFCDeviceSerializer,
     PaymentTokenSerializer,            
     NotificationSerializer,
+    NotificationSettingSerializer,
     AccountSearchSerializer,
     InitiateTransferSerializer,
     TransactionSerializer,
     ConfirmTransferSerializer,
-    InitiateRequestSerializer
+    InitiateRequestSerializer,
+    VirtualCardCreateSerializer,
+    TopUpSerializer,
+    WithdrawSerializer,
+    SecuritySettingSerializer,
+    ChangePasswordSerializer,
+    ChangePinSerializer,
+
 )
 from django.core.mail import EmailMultiAlternatives
 from twilio.rest import Client
@@ -41,12 +54,21 @@ from django.http import HttpResponse
 from io import BytesIO
 import babel.numbers
 from xhtml2pdf import pisa
+import requests
+from .helpers import send_notification
+import pyotp
+
 
 
 def index(request):
     return render(request, 'index.html')
 
 
+import stripe, tap_sdk   # assuming python SDKs
+
+stripe.api_key    = settings.STRIPE_SECRET_KEY
+# clickpesa.api_key = settings.CLICKPESA_SECRET_KEY
+# tap = tap_sdk.Client(api_key=settings.TAP_SECRET_KEY)
 
 
 # ---------------------------------------------------------------------
@@ -187,6 +209,14 @@ def virtualcard_detail(request, pk):
             amount=0
         )
 
+        # send_notification(
+        #     user=request.user,
+        #     notification_type="payment_success",
+        #     title="Payment Successful",
+        #     message="Your payment of $20 was successful.",
+        #     amount=20
+        # )
+
         # Send email notification.
         subject = "Virtual Card Deleted"
         message = f"Dear {request.user.first_name or request.user.email},\n\nYour virtual card ending with {masked_last4} has been deleted."
@@ -268,10 +298,12 @@ def paymenttoken_detail(request, pk):
 # Notification API Endpoint
 # ---------------------------------------------------------------------
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def notification_list(request):
-    notifications = Notification.objects.all()
+    notifications = Notification.objects.filter(user=request.user)
     serializer = NotificationSerializer(notifications, many=True)
     return Response(serializer.data)
+
 
 
 @api_view(['GET'])
@@ -282,6 +314,36 @@ def notification_detail(request, pk):
         return Response({'error': 'Notification not found'}, status=status.HTTP_404_NOT_FOUND)
     serializer = NotificationSerializer(notification)
     return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def mark_notification_read(request, nid):
+    try:
+        notification = Notification.objects.get(nid=nid, user=request.user)
+        notification.is_read = True
+        notification.save()
+        return Response({"status": "marked as read"})
+    except Notification.DoesNotExist:
+        return Response({"error": "Notification not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+
+
+
+
+
+class NotificationSettingDetail(generics.RetrieveUpdateAPIView):
+    """
+    GET  /api/notification-settings/    → read all toggles
+    PATCH/PUT /api/notification-settings/ → update any subset
+    """
+    serializer_class = NotificationSettingSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        # ensure one exists:
+        setting, _ = NotificationSettings.objects.get_or_create(user=self.request.user)
+        return setting
 
 
 
@@ -489,6 +551,7 @@ def download_receipt(request, tx_id):
     return resp
 
 
+
 # ---------------------------------------------------------------------
 # PAYMENT REQUEST API Endpoints
 # ---------------------------------------------------------------------
@@ -522,16 +585,16 @@ def _send_request_notifications(tx):
     mail.send()
 
     # --- SMS via Twilio ---
-    tw = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
-    sms_from = settings.TWILIO_PHONE_NUMBER
+    # tw = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+    # sms_from = settings.TWILIO_PHONE_NUMBER
 
-    # to receiver
-    body = f"{sender.kyc.First_name} requests {ctx['formatted_amount']} from you. TX ID: {tx.transaction_id}"
-    tw.messages.create(body=body, from_=sms_from, to=receiver.kyc.mobile)
+    # # to receiver
+    # body = f"{sender.kyc.First_name} requests {ctx['formatted_amount']} from you. TX ID: {tx.transaction_id}"
+    # tw.messages.create(body=body, from_=sms_from, to=receiver.kyc.mobile)
 
-    # to sender
-    body = f"Your request for {ctx['formatted_amount']} to {ctx['receiver_name']} has been sent. TX ID: {tx.transaction_id}"
-    tw.messages.create(body=body, from_=sms_from, to=sender.kyc.mobile)
+    # # to sender
+    # body = f"Your request for {ctx['formatted_amount']} to {ctx['receiver_name']} has been sent. TX ID: {tx.transaction_id}"
+    # tw.messages.create(body=body, from_=sms_from, to=sender.kyc.mobile)
 
 
 
@@ -587,3 +650,424 @@ def download_request_receipt(request, tx_id):
     resp = HttpResponse(buf, content_type="application/pdf")
     resp["Content-Disposition"] = f'attachment; filename="request_{tx.transaction_id}.pdf"'
     return resp
+
+
+
+
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def settle_request(request, account_number, transaction_id):
+    """
+    PATCH  /api/accounts/{account_number}/transactions/{transaction_id}/settle/
+    Marks a pending transaction as completed by the receiver.
+    """
+    account = get_object_or_404(Account, account_number=account_number)
+    # filter on the real FK field:
+    tx = get_object_or_404(
+        Transaction,
+        transaction_id=transaction_id,
+        reciver_account=account
+    )
+
+    # only the owner of that account may settle
+    if request.user != account.user:
+        return Response(
+            {"detail": "You do not have permission to settle this request."},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    if tx.status != 'pending':
+        return Response(
+            {"detail": f"Cannot settle a transaction in status '{tx.status}'."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    tx.status = 'completed'
+    tx.save()
+    return Response(TransactionSerializer(tx).data, status=status.HTTP_200_OK)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_request(request, account_number, transaction_id):
+    """
+    DELETE /api/accounts/{account_number}/transactions/{transaction_id}/
+    Deletes a transaction (sender only).
+    """
+    account = get_object_or_404(Account, account_number=account_number)
+    # the “sender” side of that FK
+    tx = get_object_or_404(
+        Transaction,
+        transaction_id=transaction_id,
+        sender_account=account
+    )
+
+    if request.user != account.user:
+        return Response(
+            {"detail": "You do not have permission to delete this request."},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    tx.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
+
+
+
+
+# ---------------------------------------------------------------------
+# VirtualCardCreateSerializer API Endpoints
+# ---------------------------------------------------------------------
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def add_virtual_card(request):
+    """
+    POST /api/virtual-cards/  
+    payload: {
+      "card_number": "4242424242424242",
+      "exp_month": 2,
+      "exp_year": 2030,
+      "cvc": "123",
+      "card_name": "My Blue Visa"
+    }
+    """
+    serializer = VirtualCardCreateSerializer(data=request.data, context={'request': request})
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    card = serializer.save()
+
+    # 1) create a notification
+    Notification.objects.create(
+        user=request.user,
+        notification_type="Added Virtual Card",
+        amount=0,
+    )
+
+    # 2) send email (text + HTML)
+    subject   = "Your Virtual Card is Ready!"
+    from_email = settings.DEFAULT_FROM_EMAIL
+    to = [request.user.email]
+
+    text_body = render_to_string('emails/virtual_card_added.txt', {
+        'user':    request.user,
+        'card':    card,
+        'request': request,
+    })
+    html_body = render_to_string('emails/virtual_card_added.html', {
+        'user':    request.user,
+        'card':    card,
+        'request': request,
+    })
+
+    email = EmailMultiAlternatives(subject, text_body, from_email, to)
+    email.attach_alternative(html_body, "text/html")
+    email.send()
+
+    # 3) return the fully serialized card back to client
+    out = VirtualCardSerializer(card, context={'request': request})
+    return Response(out.data, status=status.HTTP_201_CREATED)
+
+
+
+
+
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def add_card(request):
+    """
+    POST /api/cards/add/
+    Body: { "stripe_token": "tok_visa", "card_name": "My Blue Visa" }
+    """
+    user = request.user
+    account = Account.objects.get(user=user)
+
+    token = request.data.get('stripe_token')
+    if not token:
+        return Response({"error": "stripe_token is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+    # 1) Ensure a Stripe Customer exists
+    if not account.stripe_customer_id:
+        cust = stripe.Customer.create(email=user.email)
+        account.stripe_customer_id = cust.id
+        account.save()
+    else:
+        cust = stripe.Customer.retrieve(account.stripe_customer_id)
+
+    # 2) Attach the card to the customer
+    stripe_card = stripe.Customer.create_source(cust.id, source=token)
+
+    # 3) Persist in our DB
+    vc = VirtualCard.objects.create(
+        account=account,
+        card_token=stripe_card.id,
+        card_name=request.data.get('card_name', ""),
+        masked_number=f"•••• •••• •••• {stripe_card.last4}",
+        expiration_date=f"{stripe_card.exp_year}-{stripe_card.exp_month:02d}-01",  # or parse properly
+        card_type=stripe_card.brand.lower().replace(" ", "_"),
+    )
+
+    serializer = VirtualCardSerializer(vc, context={'request': request})
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def top_up(request):
+    """
+    POST /api/accounts/top-up/
+    Body: { "card_id": "<virtual-card-id>", "amount": "100.00", "currency": "USD" }
+    """
+    user    = request.user
+    account = Account.objects.get(user=user)
+    vc_id   = request.data.get('card_id')
+    amt_str = request.data.get('amount')
+    curr    = request.data.get('currency', account.default_currency_code)
+
+    if not vc_id or not amt_str:
+        return Response({"error": "card_id and amount are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        vc     = VirtualCard.objects.get(pk=vc_id, account=account, active=True)
+        amount = Decimal(amt_str)
+    except (VirtualCard.DoesNotExist, InvalidOperation):
+        return Response({"error": "Invalid card or amount"}, status=status.HTTP_400_BAD_REQUEST)
+
+    # 1) Create a Stripe charge
+    charge = stripe.Charge.create(
+        amount=int(amount * 100),
+        currency=curr.lower(),
+        customer=account.stripe_customer_id,
+        source=vc.card_token,
+        description=f"Top-up Blupay account via card {vc.masked_number}"
+    )
+
+    if charge.status != 'succeeded':
+        return Response({"error": "Charge failed"}, status=status.HTTP_402_PAYMENT_REQUIRED)
+
+    # 2) Update our balance
+    account.account_balance += amount
+    account.save()
+
+    # 3) Log the payment transaction
+    pt = PaymentTransaction.objects.create(
+        account=account,
+        virtual_card=vc,
+        amount=amount,
+        transaction_type='purchase',
+        status='completed',
+        description=f"Top-up via {vc.masked_number}"
+    )
+
+    return Response({
+        "new_balance": str(account.account_balance),
+        "transaction_id": pt.transaction_id
+    }, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def withdraw(request):
+    """
+    POST /api/accounts/withdraw/
+    Body: { "amount": "50.00", "currency": "USD", "destination": "<stripe-bank-account-id>" }
+    NOTE: for real bank payouts you’ll need Stripe Connect.
+    """
+    user    = request.user
+    account = Account.objects.get(user=user)
+    amt_str = request.data.get('amount')
+    curr    = request.data.get('currency', account.default_currency_code)
+    dest    = request.data.get('destination')
+
+    if not amt_str or not dest:
+        return Response({"error": "amount and destination are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        amount = Decimal(amt_str)
+    except Decimal.InvalidOperation:
+        return Response({"error": "Invalid amount"}, status=status.HTTP_400_BAD_REQUEST)
+
+    if account.account_balance < amount:
+        return Response({"error": "Insufficient funds"}, status=status.HTTP_400_BAD_REQUEST)
+
+    # 1) Create a Payout (you must have Stripe Connect)
+    try:
+        payout = stripe.Payout.create(
+            amount=int(amount * 100),
+            currency=curr.lower(),
+            destination=dest,
+            method="standard"
+        )
+    except stripe.error.StripeError as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    # 2) Deduct balance
+    account.account_balance -= amount
+    account.save()
+
+    # 3) Log the withdrawal
+    pt = PaymentTransaction.objects.create(
+        account=account,
+        amount=amount,
+        transaction_type='refund',  # or 'transfer'
+        status='completed',
+        description=f"Withdraw to {dest}"
+    )
+
+    return Response({
+        "new_balance": str(account.account_balance),
+        "payout_id": payout.id
+    }, status=status.HTTP_200_OK)
+
+
+
+
+
+
+#` ---------------------------------------------------------------------
+# SECURITY API Endpoints
+# ---------------------------------------------------------------------
+class SecuritySettingDetail(generics.RetrieveUpdateAPIView):
+    """
+    GET  /api/security/       → read toggles
+    PATCH       /api/security/ → update remember_me / face_id / biometric_id
+    """
+    serializer_class = SecuritySettingSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        setting, _ = SecuritySetting.objects.get_or_create(user=self.request.user)
+        return setting
+
+    @action(detail=False, methods=["POST"], url_path="google-auth/setup")
+    def setup_google_auth(self, request):
+        """
+        POST /api/security/google-auth/setup/
+        → returns a TOTP provisioning URI (and QR-code URL) for the client
+        """
+        setting = self.get_object()
+        # generate a new base32 secret and save
+        secret = pyotp.random_base32(length=32)
+        setting.ga_secret = secret
+        setting.save(update_fields=["ga_secret"])
+
+        otpauth = pyotp.totp.TOTP(secret).provisioning_uri(
+            name=request.user.email, issuer_name="Bluepay"
+        )
+        return Response({"otpauth_url": otpauth})
+
+    @action(detail=False, methods=["POST"], url_path="google-auth/verify")
+    def verify_google_auth(self, request):
+        """
+        POST /api/security/google-auth/verify/
+        { code: '123456' } → on success, flip ga_enabled=True
+        """
+        code = request.data.get("code")
+        setting = self.get_object()
+        totp = pyotp.TOTP(setting.ga_secret or "")
+        if totp.verify(code):
+            setting.ga_enabled = True
+            setting.save(update_fields=["ga_enabled"])
+            return Response({"detail": "Google Authenticator enabled."})
+        return Response({"detail": "Invalid code."}, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class ChangePasswordView(generics.GenericAPIView):
+    """
+    POST /api/security/change-password/
+    Throttled, validated, with confirmation email.
+    """
+    serializer_class = ChangePasswordSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [throttling.UserRateThrottle]
+
+    def post(self, request):
+        ser = self.get_serializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+
+        user = request.user
+        if not user.check_password(ser.validated_data["old_password"]):
+            return Response(
+                {"old_password": "Wrong password."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user.set_password(ser.validated_data["new_password"])
+        user.save()
+
+        # Send email only (no SMS for password)
+        subject = "Your password has been changed"
+        context = {"user": user}
+        text_body = render_to_string("emails/password_changed.txt", context)
+        html_body = render_to_string("emails/password_changed.html", context)
+        send_mail(
+            subject,
+            text_body,
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            html_message=html_body,
+        )
+
+        return Response({"detail": "Password have been changed successfully."})
+
+
+
+
+class ChangePinView(generics.GenericAPIView):
+    """
+    POST /api/security/change-pin/
+    Throttled, validated, with email+SMS on success.
+    """
+    serializer_class = ChangePinSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [throttling.UserRateThrottle]
+
+    def post(self, request):
+        ser = self.get_serializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+        # Validate old PIN
+        old = ser.validated_data["old_pin"]
+        new = ser.validated_data["new_pin1"]
+
+        account = Account.objects.get(user=request.user)
+        if not account.check_pin(old):
+            return Response(
+                {"old_pin": "Incorrect PIN."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Hash & save new PIN
+        account.set_pin(new)
+        account.save(update_fields=["pin_hash", "pin_number"])
+
+        # Send email
+        subject    = "Your PIN has been changed"
+        context    = {
+            "user": request.user,
+            "masked_pin": f"•••• {new[-2:]}"
+        }
+        text_body  = render_to_string("emails/pin_changed.txt", context)
+        html_body  = render_to_string("emails/pin_changed.html", context)
+        send_mail(
+            subject,
+            text_body,
+            settings.DEFAULT_FROM_EMAIL,
+            [request.user.email],
+            html_message=html_body,
+        )
+
+        # Send SMS
+        # if account.mobile:
+        #     tw = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+        #     tw.messages.create(
+        #         to=account.mobile,
+        #         from_=settings.TWILIO_FROM_NUMBER,
+        #         body=f"Hi {user.first_name}, your wallet PIN was successfully changed."
+        #     )
+
+        return Response({"detail": "PIN changed successfully."})

@@ -74,3 +74,23 @@ class OTPVerification(models.Model):
         verbose_name_plural = "OTP VERIFICATIONS"  # Plural name
     
    
+
+
+class DeactivationReason(models.Model):
+    REASON_CHOICES = [
+        ('not_accepted_widely', 'The payment system is not accepted at many locations'),
+        ('security_concerns', 'I have concerns about payment security or data privacy'),
+        ('technical_glitches', 'I encountered frequent technical issues or failed transactions'),
+        ('switched_provider', 'I switched to a different payment provider'),
+        ('limited_features', 'The system lacks features I need'),
+        ('other', 'Other (please specify)'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    reason = models.CharField(max_length=50, choices=REASON_CHOICES)
+    other_reason = models.TextField(blank=True, null=True)
+    confirmed = models.BooleanField(default=False)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.email if self.user else 'Unknown'} - {self.reason}"

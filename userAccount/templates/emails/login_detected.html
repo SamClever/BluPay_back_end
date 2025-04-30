@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>New Login Detected</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #0f1f1d; color: #dcdcdc;">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #1a2a28; padding: 30px; border-radius: 10px;">
+    <h2 style="color: #ffffff;">Hello, {{ user.email }}</h2>
+    <p style="font-size: 16px; line-height: 1.6;">
+      We recently detected a login to your <strong>BluPay</strong> account from a new device {{ device }}, location {{ ip_address }}
+      at {{ login_time|date:"Y-m-d H:i:s" }}.
+    </p>
+    <p style="font-size: 16px; line-height: 1.6;">
+      If this was not you, please reset your password and change it immediately to secure your account. Then let us know.
+    </p>
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="{{ reset_password_link }}" style="background-color: #4a4d02; color: #ffffff; text-decoration: none; padding: 12px 25px; border-radius: 25px; font-size: 16px;">
+        Reset Password
+      </a>
+    </div>
+    <p style="font-size: 16px; line-height: 1.6;">
+      Thank you for choosing BluPay as your partner. If you have any questions, please do not hesitate to 
+      <a href="" style="color: #66b2ff;">contact us</a> at any time.
+    </p>
+    <p style="margin-top: 30px;">Best Regards,<br>BluPay Team</p>
+  </div>
+</body>
+</html>
+
+

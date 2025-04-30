@@ -96,6 +96,12 @@ WSGI_APPLICATION = 'BlupayBackend.wsgi.application'
 AUTH_USER_MODEL = 'userAccount.User'
 
 
+CURRENCY_CHOICES = [
+    ('USD', 'US Dollar'),
+    ('TZS', 'Tanzanian Shilling'),
+    # ('EUR', 'Euro'),
+    # ('GBP', 'British Pound'),
+]
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -137,6 +143,13 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": (
         'rest_framework.permissions.IsAuthenticated',
     ),
+
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.UserRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "user": "5/minute",      # e.g. 5 sensitive calls per minute
+    }
 }
 
 SIMPLE_JWT = {
@@ -254,6 +267,19 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 # Twilio (or your SMS provider) credentials
-TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
-TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
-TWILIO_PHONE_NUMBER = os.getenv('TWILIO_PHONE_NUMBER')
+# TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
+# TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
+# TWILIO_PHONE_NUMBER = os.getenv('TWILIO_PHONE_NUMBER')
+
+# Twilio (or your SMS provider) credentials
+
+
+# settings.py
+STRIPE_SECRET_KEY = "sk_test_51RJ0ZLPOu0FAVH0sI1DD1DgzaSAwnhKT1vI1ogPlahACx1hZnJJRJwRTPKMfxCLizAbSbbfRhgRfarudOwUdEXJR00AdOyTQcQ"
+DEFAULT_FROM_EMAIL = "info@theblupay.com"
+
+
+CLICKPESA = {
+    "API_KEY":   "CLICKPESA_API_KEY",  # Replace with your actual API key
+    "BASE_URL": "https://api.clickpesa.com/v1",    # or whatever their base URL is
+}

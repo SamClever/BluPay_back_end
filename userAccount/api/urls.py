@@ -12,7 +12,9 @@ from .views import (
     forgot_password, 
     verify_forgot_password_otp, 
     reset_password,
-    google_login
+    google_login,
+    LogoutView,
+    DeactivateAccountView
 )
 from django.conf import settings
 from django.conf.urls.static import static
@@ -44,6 +46,9 @@ urlpatterns = [
 
     path('', view_allUsers, name='view_allUsers'),  # Matches: /movies/
     path('<int:pk>/', user_id, name='user_id'),  # Matches: /movies/1/
+
+    path('logout/', LogoutView.as_view(), name='logout'),
+    path('deactivate-account/', DeactivateAccountView.as_view(), name='deactivate-account'),
 ]
 
 if settings.DEBUG:

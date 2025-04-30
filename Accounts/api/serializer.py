@@ -147,31 +147,7 @@ class KYCStep4Serializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Date of birth must be in the past.")
         return date_of_birth
 
-    # def validate(self, attrs):
-    #     cc = attrs.pop('country_code')
-    #     pn = attrs.pop('phone_number').strip()
-    #     full = f'{cc}{pn}'
-
-    #     try:
-    #         num = phonenumbers.parse(full, None)
-    #     except phonenumbers.NumberParseException:
-    #         raise serializers.ValidationError({"phone_number": "Unable to parse phone number."})
-
-    #     if not phonenumbers.is_valid_number(num):
-    #         raise serializers.ValidationError({"phone_number": "Phone number is not valid for the given country code."})
-
-    #     # store in E.164 format
-    #     attrs['mobile'] = phonenumbers.format_number(num, PhoneNumberFormat.E164)
-    #     return super().validate(attrs)
-
-    # def validate_first_name(self, v):
-    #     return v.strip().title()
-
-    # def validate_last_name(self, v):
-    #     return v.strip().title()
-
-    # def validate_zip_code(self, v):
-    #     return v.strip()
+    
 
     
 
@@ -217,6 +193,7 @@ class KYCStep5Serializer(serializers.ModelSerializer):
             return req.build_absolute_uri(obj.selfie_image.url)
         return None
     
+
 
 ############################################
 # PIN SERIALIZER
