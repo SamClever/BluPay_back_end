@@ -28,7 +28,7 @@ class KYCInline(admin.StackedInline):
 @admin.register(Account)
 class AccountAdmin(admin.ModelAdmin):
     list_display = (
-        'user', 'account_number', 'account_id', 'account_balance', 
+        'user', 'account_number', 'account_id', 'account_balance','default_currency_code', 
         'account_status', 'kyc_submitted', 'kyc_confirmed', 'date'
     )
     list_filter = ('account_status', 'date')
@@ -39,10 +39,10 @@ class AccountAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Basic Information', {
-            'fields': ('user', 'account_balance', 'account_number', 'account_id', 'pin_number', 'red_code')
+            'fields': ('user', 'default_currency_code', 'account_balance', 'account_number', 'account_id', 'pin_number', 'red_code')
         }),
         ('Status & Verification', {
-            'fields': ('account_status', 'kyc_submitted', 'kyc_confirmed')
+            'fields': ('account_status','pin_hash', 'kyc_submitted', 'kyc_confirmed','stripe_customer_id')
         }),
         ('Additional Info', {
             'fields': ('recommended_by', 'fingerprint_enabled', 'fingerprint_secret','faceid_enabled', 'faceid_secret')

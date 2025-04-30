@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from userAccount.models import User
+from userAccount.models import User,DeactivationReason
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from rest_framework.validators import UniqueValidator
@@ -42,6 +42,23 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data)
         return user
 
+
+
+
+class DeactivationReasonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DeactivationReason
+        fields = ['reason', 'other_reason', 'confirmed']
+
+    def validate(self, data):
+        if not data.get('confirmed'):
+            raise serializers.ValidationError("You must confirm the deletetions.")
+        
+        if data['reason'] == 'other' and not data.get('other_reason'):
+            raise serializers.ValidationError({"other_reason": "Please provide a reason if you selected 'Other'."})
+        
+        return data
+    
 
 
 class UserSerializer(serializers.ModelSerializer):

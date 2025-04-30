@@ -4,6 +4,10 @@ from userAccount.models import User
 from shortuuid.django_fields import ShortUUIDField
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.contrib.auth.hashers import make_password, check_password
+from BlupayBackend.settings import CURRENCY_CHOICES
+
+
 
 ACCOUNT_STATUS = (
     ("active", "Active"),
@@ -39,12 +43,28 @@ class Account(models.Model):
     id = models.UUIDField(primary_key=True, unique=True, default=uuid.uuid4, editable=False)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     account_balance = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    stripe_customer_id = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+       help_text="The Stripe Customer ID for this account"
+    )
+    
+    default_currency_code = models.CharField(
+        max_length=3,
+        choices=CURRENCY_CHOICES,
+        default='TZS',
+        help_text="ISO 4217 currency code for this account"
+    )
     account_number = ShortUUIDField(
         length=10, unique=True, max_length=25, prefix="217", alphabet="1234567890"
     )
     account_id = ShortUUIDField(
         length=7, unique=True, max_length=25, prefix="DEX", alphabet="1234567890"
     )
+
+    pin_hash            = models.CharField(max_length=128, blank=True)
+
     pin_number = ShortUUIDField(
         length=4, unique=True, max_length=7, alphabet="1234567890"
     )
@@ -72,6 +92,25 @@ class Account(models.Model):
         null=True,
         related_name="recommended_accounts"  # Updated related_name for clarity
     )
+
+    def set_pin(self, raw_pin):
+        """
+        Hash & store the PIN. Also preserve a random 4-digit PIN_number
+        if you still want to display/test a user-visible PIN.
+        """
+        self.pin_hash   = make_password(raw_pin)
+        # Optionally generate a new short display PIN:
+        self.pin_number = raw_pin[-4:]
+        # (or leave pin_number untouched if you don't need it)
+        return self.pin_hash
+
+    def check_pin(self, raw_pin) -> bool:
+        """
+        Returns True if the provided raw_pin matches.
+        """
+        if not self.pin_hash:
+            return False
+        return check_password(raw_pin, self.pin_hash)
 
     class Meta:
         ordering = ['-date']
