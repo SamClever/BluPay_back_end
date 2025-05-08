@@ -238,15 +238,11 @@ class FaceIDLoginSerializer(serializers.Serializer):
 # ACCOUNTACTIVATIONS Serializer
 ###########################################
 class AccountActivationSerializer(serializers.ModelSerializer):
+    wallet_number = serializers.CharField(source='wallet_number', read_only=True)
     class Meta:
         model = Account
-        fields = [
-            "account_number",
-            "pin_number",
-            "red_code",
-            "account_status",
-        ]
-        read_only_fields = fields
+        fields = ['wallet_number','pin_number','red_code','account_status']
+        read_only_fields = ['wallet_number']
 
 
 
@@ -286,8 +282,8 @@ class UserProfileSerializer(serializers.Serializer):
 
 
 class AccountSummarySerializer(serializers.Serializer):
-    account_number = serializers.CharField(source='account.account_number')
-    balance        = serializers.DecimalField(source='account.account_balance', max_digits=12, decimal_places=2)
+    wallet_number = serializers.CharField(source='account.wallet_number', read_only=True)
+    balance       = serializers.DecimalField(source='account.account_balance', max_digits=12, decimal_places=2)
 
 
 class DashboardSerializer(serializers.Serializer):

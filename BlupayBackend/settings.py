@@ -279,7 +279,24 @@ STRIPE_SECRET_KEY = "sk_test_51RJ0ZLPOu0FAVH0sI1DD1DgzaSAwnhKT1vI1ogPlahACx1hZnJ
 DEFAULT_FROM_EMAIL = "info@theblupay.com"
 
 
-CLICKPESA = {
-    "API_KEY":   "CLICKPESA_API_KEY",  # Replace with your actual API key
-    "BASE_URL": "https://api.clickpesa.com/v1",    # or whatever their base URL is
+import os
+
+# MDES (Mastercard Digital Enablement Service) configuration
+MDES = {
+    # You can also pull these from environment variables for security
+    'API_KEY':     os.getenv('MDES_SANDBOX_API_KEY', '<your-sandbox-api-key>'),
+    'API_SECRET':  os.getenv('MDES_SANDBOX_API_SECRET', '<your-sandbox-api-secret>'),
+    # MDES sandbox base URL (check Mastercard’s docs for the exact path)
+    'ENDPOINT':    'https://sandbox.api.mastercard.com/mdes/v1',
 }
+
+
+
+# MDES
+MDES_BASE_URL = "https://sandbox.api.mastercard.com/mdes"
+MDES_CERT_PATH = "/path/to/your/client_cert.p12"
+MDES_CERT_PASSWORD = "your_cert_password"
+MDES_BASIC_AUTH = "Base64(client_id:client_secret)"  # if required
+MDES_CARD_ACCEPTOR_ID = "1234567890"
+MDES_BIN = "123456"
+

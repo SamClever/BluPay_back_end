@@ -52,6 +52,12 @@ CARD_TYPE = (
 )
 
 
+RISK_LEVEL = (
+    ("low", "Low"),
+    ("medium", "Medium"),
+    ("high", "High"),
+)
+
 # -----------------------------------------------------------------------------
 # Helper Function: Luhn Check
 # -----------------------------------------------------------------------------
@@ -201,12 +207,30 @@ class Transaction(models.Model):
     update = models.DateTimeField(auto_now_add=False, null=True, blank=True)
 
 
+    # Fraud & Risk fields
+    risk_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    risk_level = models.CharField(max_length=10, choices=RISK_LEVEL, default='low')
+
+
     def __str__(self):
         try:
             return f"{self.user}"
         except:
             return f"Transaction"
-        
+
+
+
+class Biller(models.Model):
+    """Service payment aggregator or biller details."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255)
+    api_endpoint = models.URLField(help_text="External API endpoint for this biller")
+    api_key = models.CharField(max_length=255, blank=True, null=True)
+    active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
 
 
 
@@ -226,6 +250,13 @@ class VirtualCard(models.Model):
     default_card = models.BooleanField(default=False)
 
     card_type = models.CharField(max_length=20, choices=CARD_TYPE, blank=True, null=True)
+
+
+    # Tokenization metadata
+    token_provider = models.CharField(max_length=50, choices=CARD_TYPE, blank=True, null=True)
+    token_status = models.CharField(max_length=20, choices=(
+        ('active','Active'), ('inactive','Inactive'), ('revoked','Revoked')
+    ), default='active')
 
 
     # def clean(self):
@@ -307,6 +338,24 @@ class VirtualCard(models.Model):
         return f"{self.account.user} - {self.masked_number}"
     
 
+
+
+class EMVToken(models.Model):
+    """Represents an EMVCo-compliant token for card provisioning."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    virtual_card = models.ForeignKey(VirtualCard, on_delete=models.CASCADE, related_name="emv_tokens")
+    token_reference = models.CharField(max_length=255, unique=True)
+    provider = models.CharField(max_length=50, choices=CARD_TYPE)
+    status = models.CharField(max_length=20, choices=(
+        ('provisioned','Provisioned'), ('activated','Activated'), ('deactivated','Deactivated')
+    ), default='provisioned')
+    provisioned_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    def __str__(self):
+        return self.token_reference
+    
+
 class PaymentTransaction(models.Model):
     NONE      = "none"
     TOP_UP    = "top_up"
@@ -349,9 +398,17 @@ class NFCDevice(models.Model):
     device_id = models.CharField(max_length=255, unique=True)
     device_name = models.CharField(max_length=255, blank=True)
     registered_at = models.DateTimeField(auto_now_add=True)
+
+
+    # Device binding & fingerprinting
+    device_fingerprint = models.CharField(max_length=255, blank=True, help_text="Fingerprint for binding")
+    os_version = models.CharField(max_length=100, blank=True)
+    is_bound = models.BooleanField(default=False)
+    last_verified_at = models.DateTimeField(null=True, blank=True)
+
     
     def __str__(self):
-        return self.device_id
+        return f"NFCDevice {self.device_id} for {self.account.user.email}"
 
 class PaymentToken(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -360,6 +417,10 @@ class PaymentToken(models.Model):
     virtual_card = models.ForeignKey(VirtualCard, on_delete=models.SET_NULL, null=True, blank=True, related_name="payment_tokens")
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
+
+
+    # Tracking provider for tap-to-pay
+    provider = models.CharField(max_length=50, choices=CARD_TYPE, blank=True, null=True)
     
     def __str__(self):
         return self.token
@@ -430,3 +491,26 @@ class SecuritySetting(models.Model):
     
 
 
+
+
+
+class ComplianceRecord(models.Model):
+    COMPLIANCE_TYPE_CHOICES = [
+        ('pci_dss', 'PCI-DSS'),
+        ('emvco', 'EMVCo')
+    ]
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('compliant', 'Compliant'),
+        ('non_compliant', 'Non-Compliant')
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    compliance_type = models.CharField(max_length=20, choices=COMPLIANCE_TYPE_CHOICES)
+    level = models.CharField(max_length=20, help_text="Merchant or service level, e.g., Level 1")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    last_audit_date = models.DateField(null=True, blank=True)
+    next_due_date = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.compliance_type} - {self.status}"

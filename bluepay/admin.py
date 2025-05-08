@@ -7,7 +7,8 @@ from .models import (
     PaymentTransaction,
     NFCDevice,
     PaymentToken,
-    SecuritySetting
+    SecuritySetting,
+    EMVToken,
 
 )
 
@@ -71,14 +72,14 @@ class PaymentTransactionAdmin(admin.ModelAdmin):
 
 @admin.register(NFCDevice)
 class NFCDeviceAdmin(admin.ModelAdmin):
-    list_display = ('device_id', 'account', 'device_name', 'registered_at')
+    list_display = ('device_id', 'account', 'device_name', 'registered_at', 'device_fingerprint', 'os_version', 'last_verified_at')
     list_filter = ('registered_at',)
     search_fields = ('device_id', 'account__user__username', 'device_name')
     ordering = ('-registered_at',)
     readonly_fields = ('registered_at',)
     fieldsets = (
         ('Device Info', {
-            'fields': ('account', 'device_id', 'device_name'),
+            'fields': ('account', 'device_id', 'device_name', 'device_fingerprint', 'os_version', 'last_verified_at'),
         }),
         ('Metadata', {
             'fields': ('registered_at',),
@@ -87,14 +88,14 @@ class NFCDeviceAdmin(admin.ModelAdmin):
 
 @admin.register(PaymentToken)
 class PaymentTokenAdmin(admin.ModelAdmin):
-    list_display = ('token', 'account', 'virtual_card', 'created_at', 'expires_at')
+    list_display = ('token', 'account', 'virtual_card', 'created_at', 'expires_at', 'provider')
     list_filter = ('created_at', 'expires_at')
     search_fields = ('token', 'account__user__username')
     ordering = ('-created_at',)
     readonly_fields = ('token', 'created_at')
     fieldsets = (
         ('Token Info', {
-            'fields': ('token', 'account', 'virtual_card'),
+            'fields': ('token', 'account', 'virtual_card', 'provider'),
         }),
         ('Validity', {
             'fields': ('created_at', 'expires_at'),
@@ -153,3 +154,19 @@ class SecuritySettingAdmin(admin.ModelAdmin):
     search_fields = ('user__email', 'user__username')
     list_filter = ('face_id', 'biometric_id', 'ga_enabled')
     readonly_fields = ('updated_at',)
+
+
+
+@admin.register(EMVToken)
+class EMVTokenAdmin(admin.ModelAdmin):
+    list_display = (
+        'token_reference', 
+        'provider', 
+        'status', 
+        'virtual_card', 
+        'provisioned_at', 
+        'expires_at'
+    )
+    list_filter = ('status', 'provider')
+    search_fields = ('token_reference', 'virtual_card__id')
+    readonly_fields = ('provisioned_at',)

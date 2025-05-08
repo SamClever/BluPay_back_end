@@ -28,18 +28,19 @@ class KYCInline(admin.StackedInline):
 @admin.register(Account)
 class AccountAdmin(admin.ModelAdmin):
     list_display = (
-        'user', 'account_number', 'account_id', 'account_balance','default_currency_code', 
+        'user', 'wallet_number', 'account_id', 'account_balance','default_currency_code', 
         'account_status', 'kyc_submitted', 'kyc_confirmed', 'date'
     )
     list_filter = ('account_status', 'date')
-    search_fields = ('user__username', 'account_number', 'account_id')
+    search_fields = ('user__username', 'wallet_number', 'account_id')
     ordering = ('-date',)
-    readonly_fields = ('date',)
+    readonly_fields = ('date', 'wallet_number', 'account_id', 'pin_hash')
+    
     inlines = [KYCInline]  # if you want to include KYC details inline
 
     fieldsets = (
         ('Basic Information', {
-            'fields': ('user', 'default_currency_code', 'account_balance', 'account_number', 'account_id', 'pin_number', 'red_code')
+            'fields': ('user', 'default_currency_code', 'account_balance', 'account_id', 'pin_number', 'red_code')
         }),
         ('Status & Verification', {
             'fields': ('account_status','pin_hash', 'kyc_submitted', 'kyc_confirmed','stripe_customer_id')

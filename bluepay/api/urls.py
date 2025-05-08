@@ -53,12 +53,12 @@ urlpatterns = [
          name="download-request-receipt"),
 
     path(
-        'accounts/<str:account_number>/transactions/<str:transaction_id>/settle/',
+        'accounts/<str:wallet_number>/transactions/<str:transaction_id>/settle/',
         settle_request,
         name='api-transaction-settle'
     ),
     path(
-        'accounts/<str:account_number>/transactions/<str:transaction_id>/',
+        'accounts/<str:wallet_number>/transactions/<str:transaction_id>/',
         delete_request,
         name='api-transaction-delete'
     ),

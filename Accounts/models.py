@@ -56,9 +56,6 @@ class Account(models.Model):
         default='TZS',
         help_text="ISO 4217 currency code for this account"
     )
-    account_number = ShortUUIDField(
-        length=10, unique=True, max_length=25, prefix="217", alphabet="1234567890"
-    )
     account_id = ShortUUIDField(
         length=7, unique=True, max_length=25, prefix="DEX", alphabet="1234567890"
     )
@@ -115,8 +112,20 @@ class Account(models.Model):
     class Meta:
         ordering = ['-date']
 
+    @property
+    def wallet_number(self):
+        """
+        Derive the wallet number from the primary virtual card's masked_number.
+        """
+        primary_card = self.virtual_cards.filter(default_card=True).first()
+        if not primary_card:
+            primary_card = self.virtual_cards.first()
+        return primary_card.masked_number if primary_card else None
+    
+    
+
     def __str__(self):
-        return f"{self.user}"
+        return f"Wallet {self.wallet_number} ({self.user.email})"
 
 @receiver(post_save, sender=User)
 def create_account(sender, instance, created, **kwargs):

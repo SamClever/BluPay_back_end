@@ -368,8 +368,8 @@ def search_account(request):
         )
 
     qs = Account.objects.filter(
-        Q(account_number__iexact=q)    |
-        Q(user__email__icontains=q)    |
+        Q(virtual_cards__masked_number__iexact=q) |
+        Q(user__email__icontains=q) |
         Q(kyc__First_name__icontains=q),
         kyc_confirmed=True
     ).distinct()
@@ -656,62 +656,29 @@ def download_request_receipt(request, tx_id):
 
 
 @api_view(['PATCH'])
-@permission_classes([IsAuthenticated])
-def settle_request(request, account_number, transaction_id):
-    """
-    PATCH  /api/accounts/{account_number}/transactions/{transaction_id}/settle/
-    Marks a pending transaction as completed by the receiver.
-    """
-    account = get_object_or_404(Account, account_number=account_number)
-    # filter on the real FK field:
-    tx = get_object_or_404(
-        Transaction,
-        transaction_id=transaction_id,
-        reciver_account=account
-    )
-
-    # only the owner of that account may settle
+@permission_classes([permissions.IsAuthenticated])
+def settle_request(request, wallet_number, transaction_id):
+    card = get_object_or_404(VirtualCard, masked_number=wallet_number)
+    account = card.account
     if request.user != account.user:
-        return Response(
-            {"detail": "You do not have permission to settle this request."},
-            status=status.HTTP_403_FORBIDDEN
-        )
-
+        return Response({"detail":"No permission."}, status=status.HTTP_403_FORBIDDEN)
+    tx = get_object_or_404(Transaction, transaction_id=transaction_id, reciver_account=account)
     if tx.status != 'pending':
-        return Response(
-            {"detail": f"Cannot settle a transaction in status '{tx.status}'."},
-            status=status.HTTP_400_BAD_REQUEST
-        )
-
+        return Response({"detail":f"Cannot settle {tx.status}."}, status=status.HTTP_400_BAD_REQUEST)
     tx.status = 'completed'
     tx.save()
-    return Response(TransactionSerializer(tx).data, status=status.HTTP_200_OK)
-
+    return Response(TransactionSerializer(tx).data)
 
 @api_view(['DELETE'])
-@permission_classes([IsAuthenticated])
-def delete_request(request, account_number, transaction_id):
-    """
-    DELETE /api/accounts/{account_number}/transactions/{transaction_id}/
-    Deletes a transaction (sender only).
-    """
-    account = get_object_or_404(Account, account_number=account_number)
-    # the “sender” side of that FK
-    tx = get_object_or_404(
-        Transaction,
-        transaction_id=transaction_id,
-        sender_account=account
-    )
-
+@permission_classes([permissions.IsAuthenticated])
+def delete_request(request, wallet_number, transaction_id):
+    card = get_object_or_404(VirtualCard, masked_number=wallet_number)
+    account = card.account
     if request.user != account.user:
-        return Response(
-            {"detail": "You do not have permission to delete this request."},
-            status=status.HTTP_403_FORBIDDEN
-        )
-
+        return Response({"detail":"No permission."}, status=status.HTTP_403_FORBIDDEN)
+    tx = get_object_or_404(Transaction, transaction_id=transaction_id, sender_account=account)
     tx.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
-
 
 
 
