@@ -281,22 +281,17 @@ DEFAULT_FROM_EMAIL = "info@theblupay.com"
 
 import os
 
-# MDES (Mastercard Digital Enablement Service) configuration
-MDES = {
-    # You can also pull these from environment variables for security
-    'API_KEY':     os.getenv('MDES_SANDBOX_API_KEY', '<your-sandbox-api-key>'),
-    'API_SECRET':  os.getenv('MDES_SANDBOX_API_SECRET', '<your-sandbox-api-secret>'),
-    # MDES sandbox base URL (check Mastercard’s docs for the exact path)
-    'ENDPOINT':    'https://sandbox.api.mastercard.com/mdes/v1',
-}
 
 
+# MDES base URL (sandbox or production)
+MDES_BASE_URL = "https://api.mastercard.com/mdes"
 
-# MDES
-MDES_BASE_URL = "https://sandbox.api.mastercard.com/mdes"
-MDES_CERT_PATH = "/path/to/your/client_cert.p12"
-MDES_CERT_PASSWORD = "your_cert_password"
-MDES_BASIC_AUTH = "Base64(client_id:client_secret)"  # if required
-MDES_CARD_ACCEPTOR_ID = "1234567890"
-MDES_BIN = "123456"
+# OAuth1 consumer key (token requestor ID) and RSA private key for signing
+MDES_CONSUMER_KEY        = os.getenv("MDES_CONSUMER_KEY")
+MDES_RSA_PRIVATE_KEY     = "/path/to/your/rsa_private_key.pem"
 
+# Mastercard’s public key (for wrapping your AES session key)
+MDES_MC_PUBLIC_KEY       = "/path/to/mastercard_public_key.pem"
+
+# The 11-digit Token Requestor ID assigned by Mastercard
+MDES_TOKEN_REQUESTOR_ID  = "98765432101"

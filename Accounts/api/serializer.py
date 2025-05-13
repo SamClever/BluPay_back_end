@@ -164,6 +164,7 @@ class KYCStep5Serializer(serializers.ModelSerializer):
     class Meta:
         model = KYC
         fields = [
+            
             'identity_image_url',
             'selfie_image_url',
             'identity_type',

@@ -17,7 +17,7 @@ from Accounts.models import IDENTITY_TYPE
 from rest_framework_simplejwt.tokens import RefreshToken
 from .utils import compare_faces_aws
 import uuid
-from .mdes_client import provision_virtual_card
+from .mdes_client import create_tokenize
 import stripe
 from twilio.rest import Client
 from weasyprint import HTML
@@ -320,37 +320,80 @@ def faceid_login(request):
 # -----------------------------------------------------------------------------
 # Account Activation Endpoint
 # -----------------------------------------------------------------------------
+def provision_and_save_card(account):
+    # 1. Call MDES
+    resp = create_tokenize(
+        funding_pan=account.real_pan,
+        pan_seq=account.pan_sequence,
+        exp_month=account.expiry_month,
+        exp_year=account.expiry_year
+    )
+    # 2. Extract the token references
+    token_ref = resp["tokenUniqueReference"]
+    pan_ref   = resp["panUniqueReference"]
+    pc        = resp["productConfig"]
+    ti        = resp["tokenInfo"]          # contains maskedPan & expiry in many implementations
+
+    # 3. Save as your VirtualCard
+    card = VirtualCard.objects.create(
+        account=account,
+        token_reference=token_ref,
+        pan_reference=pan_ref,
+        masked_number=ti.get("maskedPAN"),            # adjust to actual field
+        expiration_date=ti.get("expirationDate"),     # convert MMYY→date
+        default_card=True
+    )
+    return card
+
+
+# 4. Save as your Card
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def kyc_activate_view(request):
+    # account = get_object_or_404(Account, user=request.user)
+    # if not account.kyc_submitted:
+    #     return Response({"detail": "Please complete and submit your KYC first."},
+    #                     status=status.HTTP_400_BAD_REQUEST)
+
+    # # 1. Provision through MDES
+    # try:
+    #     card_data = (account.wallet_number, request.user.id)
+    # except Exception as e:
+    #     return Response({"detail": f"Card provisioning failed: {str(e)}"},
+    #                     status=status.HTTP_502_BAD_GATEWAY)
+
+    # # 2. Save to VirtualCard model
+    
+    # exp_date = datetime.strptime(card_data["exp"], "%m%y").date()
+    # card = VirtualCard.objects.create(
+    #     account=account,
+    #     pan=card_data["pan"],
+    #     masked_number=f"**** **** **** {card_data['pan'][-4:]}",
+    #     expiration_date=exp_date,
+    #     cvc=card_data["cvc"],
+    #     token=card_data.get("token"),
+    #     default_card=True
+    # )
+
+    # # 3. Update account status
+    # account.account_status = "active"
+    # account.save()
+
     account = get_object_or_404(Account, user=request.user)
     if not account.kyc_submitted:
         return Response({"detail": "Please complete and submit your KYC first."},
                         status=status.HTTP_400_BAD_REQUEST)
 
-    # 1. Provision through MDES
     try:
-        card_data = (account.wallet_number, request.user.id)
+        card = provision_and_save_card(account)
     except Exception as e:
         return Response({"detail": f"Card provisioning failed: {str(e)}"},
                         status=status.HTTP_502_BAD_GATEWAY)
 
-    # 2. Save to VirtualCard model
-    
-    exp_date = datetime.strptime(card_data["exp"], "%m%y").date()
-    card = VirtualCard.objects.create(
-        account=account,
-        pan=card_data["pan"],
-        masked_number=f"**** **** **** {card_data['pan'][-4:]}",
-        expiration_date=exp_date,
-        cvc=card_data["cvc"],
-        token=card_data.get("token"),
-        default_card=True
-    )
-
-    # 3. Update account status
+    # update account status
     account.account_status = "active"
-    account.save()
+    account.save(update_fields=["account_status"])
 
     # 4. Send email
     expiry = card.expiration_date.strftime("%m/%y")

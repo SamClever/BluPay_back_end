@@ -1,48 +1,92 @@
-import json
-import requests
+import requests, uuid
 from datetime import datetime
 from django.conf import settings
+import json, base64
+import os
+from cryptography.hazmat.primitives import serialization, hashes
+from cryptography.hazmat.primitives.asymmetric import padding as asym_padding
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from requests_oauthlib import OAuth1
 
-MDES_BASE = settings.MDES_BASE_URL  # e.g. "https://sandbox.api.mastercard.com/mdes"
-CERT_PATH = settings.MDES_CERT_PATH  # path to your .p12 or .jks
-CERT_PASS = settings.MDES_CERT_PASSWORD
 
-def provision_virtual_card(wallet_number: str, user_id: int):
-    """
-    Calls MDES Provisioning API to create a new virtual card.
-    Returns a dict with pan, exp, cvc, token.
-    """
-    url = f"{MDES_BASE}/mdes/tokenize/v1/accounts/{wallet_number}"
-    # Build your payload per MDES spec
-    payload = {
-        "clientDetails": {
-            "clientUserId": str(user_id),
-            "clientTransactionId": f"txn-{user_id}-{int(datetime.utcnow().timestamp())}"
-        },
-        "account": {
-            "cardAcceptorId": settings.MDES_CARD_ACCEPTOR_ID,
-            "bin": settings.MDES_BIN,              # your BIN
-        },
-        # add any additional required sections here
+
+
+def mdes_oauth1():
+    with open(settings.MDES_RSA_PRIVATE_KEY, "r") as f:
+        rsa_key = f.read()
+    return OAuth1(
+        client_key=settings.MDES_CONSUMER_KEY,
+        signature_method="RSA-SHA1",
+        rsa_key=rsa_key,
+        signature_type="auth_header",
+        signature_extras={"body_hash": True}
+    )
+
+
+
+
+def load_mastercard_public_key():
+    with open(settings.MDES_MC_PUBLIC_KEY, "rb") as f:
+        return serialization.load_pem_public_key(f.read())
+
+def encrypt_sensitive_payload(obj: dict):
+    # 1. Generate a one-time AES-256 key and IV
+    aes_key = os.urandom(32)
+    iv      = os.urandom(16)
+
+    # 2. Pad and encrypt the JSON payload with AES-CBC
+    plaintext = json.dumps(obj).encode("utf-8")
+    pad_len   = 16 - (len(plaintext) % 16)
+    padded    = plaintext + bytes([pad_len] * pad_len)
+    cipher    = Cipher(algorithms.AES(aes_key), modes.CBC(iv))
+    ct        = cipher.encryptor().update(padded) + cipher.encryptor().finalize()
+
+    # 3. Wrap the AES key with Mastercard’s RSA public key (OAEP+SHA256)
+    mc_pub = load_mastercard_public_key()
+    wrapped_key = mc_pub.encrypt(
+        aes_key,
+        asym_padding.OAEP(
+            mgf=asym_padding.MGF1(hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )
+
+    return {
+        "encryptedKey": base64.b64encode(wrapped_key).decode(),
+        "iv":            iv.hex(),
+        "encryptedData": ct.hex(),
+        "oaepHashingAlgorithm": "SHA256"
     }
 
-    # MDES often requires your payload to be signed with the client cert.
-    response = requests.post(
-        url,
-        data=json.dumps(payload),
-        cert=(CERT_PATH, CERT_PASS),
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": f"Basic {settings.MDES_BASIC_AUTH}",  # if required
-            # other MDES-specific headers, e.g. x-apikey, x-request-id…
-        },
-        timeout=30
-    )
-    response.raise_for_status()
-    data = response.json()
-    # Parse out the fields (adapt to MDES response structure)
-    pan = data["account"]["pan"]
-    exp = data["account"]["expirationDate"]      # e.g. "MMYY"
-    cvc = data["securityCode"]
-    token = data.get("tokenReference")           # if tokenized
-    return {"pan": pan, "exp": exp, "cvc": cvc, "token": token}
+
+
+
+
+def create_tokenize(funding_pan: str, pan_seq: str, exp_month: int, exp_year: int):
+    auth    = mdes_oauth1()
+    url     = f"{settings.MDES_BASE_URL}/digitization/static/1/0/tokenize"
+    
+    # Prepare the encrypted fundingAccountInfo
+    funding_info = encrypt_sensitive_payload({
+        "accountNumber": funding_pan,
+        "panSequenceNumber": pan_seq,
+        "expiryMonth": f"{exp_month:02d}",
+        "expiryYear":  str(exp_year)
+    })
+
+    payload = {
+        "tokenRequestorId": settings.MDES_TOKEN_REQUESTOR_ID,
+        "tokenType":        "CLOUD",
+        "requestId":        str(uuid.uuid4()),
+        "taskId":           str(uuid.uuid4()),
+        "fundingAccountInfo": funding_info,
+        "consumerLanguage":  "en"
+    }
+
+    resp = requests.post(url, json=payload, auth=auth, headers={
+        "Content-Type": "application/json"
+    })
+    resp.raise_for_status()
+    return resp.json()
+
