@@ -1,31 +1,55 @@
 import boto3
+from botocore.exceptions import ClientError, BotoCoreError
 import os
 import phonenumbers
 import pycountry
 from phonenumbers import COUNTRY_CODE_TO_REGION_CODE
+from django.conf import settings
 
-# Assumes your AWS creds are in env vars or ~/.aws/credentials
-rekog = boto3.client('rekognition', region_name='us-east-1')
+rekog = boto3.client(
+    "rekognition",
+    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+    region_name=settings.AWS_REGION,
+)
+
 
 def compare_faces_aws(id_path: str, selfie_path: str, threshold: float = 80.0):
     """
-    Compares two local files via AWS Rekognition.
-    Returns (match: bool, similarity: float).
+    Compares two local image files using AWS Rekognition.
+    Returns: (match: bool, similarity: float)
     """
-    with open(id_path,     'rb') as f: id_bytes     = f.read()
-    with open(selfie_path, 'rb') as f: selfie_bytes = f.read()
+    try:
+        # Read and validate image data
+        with open(id_path, "rb") as f:
+            id_bytes = f.read()
+        with open(selfie_path, "rb") as f:
+            selfie_bytes = f.read()
 
-    resp = rekog.compare_faces(
-        SourceImage={'Bytes': id_bytes},
-        TargetImage={'Bytes': selfie_bytes},
-        SimilarityThreshold=threshold
-    )
-    matches = resp.get('FaceMatches', [])
-    if not matches:
+        if not id_bytes or not selfie_bytes:
+            raise ValueError("One or both image files are empty.")
+
+        # Make Rekognition API call
+        response = rekog.compare_faces(
+            SourceImage={"Bytes": id_bytes},
+            TargetImage={"Bytes": selfie_bytes},
+            SimilarityThreshold=threshold,
+        )
+
+        matches = response.get("FaceMatches", [])
+        if not matches:
+            return False, 0.0
+
+        similarity = matches[0].get("Similarity", 0.0)
+        return True, round(similarity, 2)
+
+    except (ClientError, BotoCoreError) as aws_error:
+        print(f"[AWS Error] {aws_error}")
         return False, 0.0
 
-    sim = matches[0]['Similarity']
-    return True, round(sim, 2)
+    except Exception as e:
+        print(f"[Error] {e}")
+        return False, 0.0
 
 
 def get_country_phone_code_choices():
@@ -42,5 +66,5 @@ def get_country_phone_code_choices():
             seen.add((region, dial))
             country = pycountry.countries.get(alpha_2=region)
             name = country.name if country else region
-            choices.append((f'+{dial}', f'{name} (+{dial})'))
+            choices.append((f"+{dial}", f"{name} (+{dial})"))
     return sorted(choices, key=lambda x: x[1])

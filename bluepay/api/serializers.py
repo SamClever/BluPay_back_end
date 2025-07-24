@@ -96,6 +96,7 @@ class AccountSearchSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(source='kyc.First_name', read_only=True)
     last_name  = serializers.CharField(source='kyc.Last_name',  read_only=True)
     email      = serializers.EmailField(source='user.email', read_only=True)
+    profile_image = serializers.SerializerMethodField()
 
     class Meta:
         model = Account
@@ -103,10 +104,19 @@ class AccountSearchSerializer(serializers.ModelSerializer):
             'account_number',
             'account_id',
             'email',
-            'account_balance',
             'first_name',
             'last_name',
+            "profile_image",
         ]
+        
+    def get_profile_image(self, obj):
+        kyc = KYC.objects.filter(account=obj).first()
+        request = self.context.get("request")
+        if kyc and kyc.profile_image:
+            if request:
+                return request.build_absolute_uri(kyc.profile_image.url)
+            return kyc.profile_image.url
+        return None
 
 
 

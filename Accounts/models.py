@@ -88,7 +88,7 @@ def create_account(sender, instance, created, **kwargs):
 class KYC(models.Model):
     id = models.UUIDField(primary_key=True, unique=True, default=uuid.uuid4, editable=False)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    account = models.OneToOneField(Account, on_delete=models.CASCADE, null=True, blank=True)
+    account = models.OneToOneField(Account, on_delete=models.CASCADE, null=True, blank=True, related_name="kyc")
     # full_name = models.CharField(max_length=1000)
     
 

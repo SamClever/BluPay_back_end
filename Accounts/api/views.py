@@ -132,48 +132,39 @@ def kyc_step1(request):
     """
     Screen 1 of KYC: choose identity type & country.
     """
+    if request.method == 'GET':
+        identity_choices = [
+            {'key': key, 'label': label}
+            for key, label in IDENTITY_TYPE
+        ]
+        countries = [
+            {'code': c.alpha_2, 'name': c.name}
+            for c in pycountry.countries
+        ]
+        return Response({
+            'identity_types': identity_choices,
+            'countries': countries
+        })
 
+    # POST: user has chosen their type & country
     serializer = KYCStep1Serializer(
         data=request.data,
         context={'request': request}
     )
+    # raise a 400 with a JSON body if invalid
     serializer.is_valid(raise_exception=True)
 
-    kyc = serializer.save()                # ← now calls create()
-    return Response(
-        {'message': 'KYC step 1 saved', 'identity_type': kyc.identity_type, 'country': kyc.country},
-        status=status.HTTP_200_OK
-    )
+    # this calls your ⁠ create() ⁠ above
+    kyc = serializer.save()
 
-    # if request.method == 'GET':
-    #     # build the identity‐type choices
-    #     identity_choices = [
-    #         {'key': key, 'label': label}
-    #         for key, label in IDENTITY_TYPE
-    #     ]
-    #     # build a simple country list from pycountry
-    #     countries = [
-    #         {'code': c.alpha_2, 'name': c.name}
-    #         for c in pycountry.countries
-    #     ]
-    #     return Response({
-    #         'identity_types': identity_choices,
-    #         'countries': countries
-    #     })
-
-    # # POST: user has chosen their type & country
-    # serializer = KYCStep1Serializer(data=request.data)
-    # if not serializer.is_valid():
-    #     return Response(serializer.errors, status=400)
-
-    # kyc = serializer.update_kyc(request.user)
-    # return Response({
-    #     'message': 'thank you for choosing your identity type & country',
-    #     'kyc': {
-    #         'identity_type': kyc.identity_type,
-    #         'country': kyc.country,
-    #     }
-    # })
+    return Response({
+        'message': 'Thank you for choosing your identity type & country',
+        'kyc': {
+            'identity_type': kyc.identity_type,
+            'country':       kyc.country,
+        }
+    }, status=status.HTTP_200_OK)
+    
 
 
 
