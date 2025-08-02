@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>BluPay Top-Up Confirmation</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #111827; color: #ffffff; padding: 20px;">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #1f2937; padding: 30px; border-radius: 12px;">
+    <h2 style="color: #22c55e;">✅ Top-Up Successful</h2>
+    <p>Hi {{ user.username }},</p>
+
+    <p>Your top-up of <strong style="color: #facc15;">TZS {{ amount }}</strong> to your BluPay account has been <strong>successfully processed</strong>.</p>
+
+    <div style="background-color: #374151; padding: 15px; margin: 20px 0; border-radius: 8px;">
+      <p><strong>Reference:</strong> {{ order_reference }}</p>
+      <p><strong>New Balance:</strong> TZS {{ new_balance }}</p>
+      <p><strong>Date:</strong> {{ date }}</p>
+    </div>
+
+    <p>Thank you for using <strong style="color: #2596be;">BluPay</strong>. If you have any questions, feel free to contact our support.</p>
+
+    <p style="margin-top: 30px;">Warm regards,<br>The BluPay Team</p>
+  </div>
+</body>
+</html>

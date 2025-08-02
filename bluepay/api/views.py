@@ -7,8 +7,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
+from django.utils.timezone import now
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 from django.conf import settings
 from django.db.models import Q
+import hashlib
+import hmac
+import json
 from decimal import Decimal
 from Accounts.models import *
 from bluepay.models import *
@@ -31,7 +37,8 @@ from .serializers import (
     TransactionSerializer,
     ConfirmTransferSerializer,
 )
-
+from django.utils.crypto import get_random_string
+import requests
 
 def index(request):
     return render(request, "index.html")
@@ -388,3 +395,272 @@ def confirm_transfer(request, tx_id):
     serializer.is_valid(raise_exception=True)
     tx = serializer.save()
     return Response(TransactionSerializer(tx).data)
+
+
+
+
+def get_clickpesa_token():
+    response = requests.post(
+        "https://api.clickpesa.com/third-parties/generate-token",
+        headers={
+            "client-id": settings.CLICKPESA_CLIENT_ID,
+            "api-key": settings.CLICKPESA_API_KEY,
+        },
+    )
+    if response.status_code == 200:
+        return response.json().get("token")
+    raise Exception("Failed to authenticate with ClickPesa")
+
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def topup_view(request):
+    amount = request.data.get("amount")
+    phone = request.data.get("phone")
+
+    if not amount or not phone:
+        return Response({"error": "Amount and phone are required."}, status=400)
+
+    account = Account.objects.get(user=request.user)
+    order_ref = "BLU" + get_random_string(10).upper()
+
+    try:
+        token = get_clickpesa_token()
+
+        # Preview
+        preview = requests.post(
+            "https://api.clickpesa.com/third-parties/payments/preview-ussd-push-request",
+            json={"amount": str(amount), "currency": "TZS", "orderReference": order_ref},
+            headers={"Authorization": token}
+        )
+        if preview.status_code != 200:
+            return Response({"error": "Preview failed"}, status=500)
+
+        # Initiate USSD Push
+        push = requests.post(
+            "https://api.clickpesa.com/third-parties/payments/initiate-ussd-push-request",
+            json={
+                "amount": str(amount),
+                "currency": "TZS",
+                "orderReference": order_ref,
+                "phoneNumber": phone
+            },
+            headers={"Authorization": token}
+        )
+        if push.status_code != 200:
+            return Response({"error": "Push failed"}, status=500)
+
+        # Log pending transaction
+        Transaction.objects.create(
+            user=request.user,
+            amount=amount,
+            description=f"Top-up via ClickPesa | OrderRef: {order_ref}",
+            reciver=request.user,
+            reciver_account=account,
+            status="pending",
+            transaction_type="recieved",
+            reference=order_ref  # Add this field to track
+        )
+
+        return Response({"message": "USSD push initiated", "orderReference": order_ref, "CLickpesatoken": token})
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
+
+
+
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+@api_view(["POST"])
+def clickpesa_webhook(request):
+    data = request.data
+    order_ref = data.get("orderReference")
+    status_code = data.get("status")
+
+    if not order_ref or not status_code:
+        return Response({"error": "Invalid payload"}, status=400)
+
+    try:
+        transaction = Transaction.objects.get(reference=order_ref)
+        user = transaction.reciver  # or transaction.user
+
+        if status_code in ["SUCCESS", "SETTLED"]:
+            transaction.status = "completed"
+            transaction.reciver_account.account_balance += transaction.amount
+            transaction.reciver_account.save()
+
+            # Send success email
+            html_content = render_to_string("emails/topup_success.html", {
+                "user": user,
+                "amount": transaction.amount,
+                "order_reference": order_ref,
+                "new_balance": transaction.reciver_account.account_balance,
+                "date": now().strftime("%Y-%m-%d %H:%M"),
+            })
+
+            email = EmailMultiAlternatives(
+                subject="BluPay Top-Up Successful",
+                body="Your top-up was successful.",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[user.email],
+            )
+            email.attach_alternative(html_content, "text/html")
+            email.send(fail_silently=True)
+        else:
+            transaction.status = "failed"
+
+        transaction.save()
+        return Response({"message": "Webhook processed"}, status=200)
+
+    except Transaction.DoesNotExist:
+        return Response({"error": "Transaction not found"}, status=404)
+
+
+
+def generate_checksum(payload: dict, checksum_key: str):
+    # Step 1: Sort payload keys
+    sorted_payload = {k: payload[k] for k in sorted(payload)}
+
+    # Step 2: Concatenate values into a string
+    payload_string = "".join(str(value) for value in sorted_payload.values())
+
+    # Step 3: HMAC-SHA256 hash
+    return hmac.new(checksum_key.encode(), payload_string.encode(), hashlib.sha256).hexdigest()
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def mobile_money_payout_view(request):
+    amount = request.data.get("amount")
+    phone = request.data.get("phone")
+
+    if not amount or not phone:
+        return Response({"error": "Amount and phone are required."}, status=400)
+
+    user = request.user
+    account = Account.objects.get(user=user)
+
+    if account.account_balance < float(amount):
+        return Response({"error": "Insufficient funds"}, status=400)
+
+    order_ref = "BLUPAY-WD-" + get_random_string(10).upper()
+    payout_payload = {
+        "amount": str(amount),
+        "phoneNumber": phone,
+        "currency": "TZS",
+        "orderReference": order_ref
+    }
+
+    # Add checksum
+    # Generate checksum using the correct method
+    checksum = generate_checksum(payout_payload, settings.CLICKPESA_API_KEY)
+    payout_payload["checksum"] = checksum
+
+    try:
+        token = get_clickpesa_token()
+
+        # Preview
+        preview = requests.post(
+            "https://api.clickpesa.com/third-parties/payouts/preview-mobile-money-payout",
+            json=payout_payload,
+            headers={"Authorization": token}
+        )
+        if preview.status_code != 200:
+            return Response({"error": "Payout preview failed"}, status=500)
+
+        # Create Payout
+        payout = requests.post(
+            "https://api.clickpesa.com/third-parties/payouts/create-mobile-money-payout",
+            json=payout_payload,
+            headers={"Authorization": token}
+        )
+        if payout.status_code != 200:
+            return Response({"error": "Payout request failed"}, status=500)
+
+        # Deduct balance & save transaction
+        account.account_balance -= float(amount)
+        account.save()
+
+        Transaction.objects.create(
+            user=user,
+            amount=amount,
+            description=f"Withdrawal to MNO via ClickPesa",
+            status="pending",
+            transaction_type="sent",
+            reference=order_ref
+        )
+
+        return Response({"message": "Payout initiated", "orderReference": order_ref})
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
+
+
+
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def query_payout_status(request, order_reference):
+    try:
+        # Get user token from ClickPesa
+        token_response = requests.post(
+            "https://api.clickpesa.com/third-parties/generate-token",
+            headers={
+                "client-id": settings.CLICKPESA_CLIENT_ID,
+                "api-key": settings.CLICKPESA_API_KEY
+            }
+        )
+        token_data = token_response.json()
+        token = token_data.get("token")
+
+        if not token:
+            return Response({"error": "Failed to get token from ClickPesa"}, status=500)
+
+        # Query payout status
+        status_response = requests.get(
+            f"https://api.clickpesa.com/third-parties/payouts/{order_reference}",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+
+        if status_response.status_code != 200:
+            return Response({"error": "Failed to fetch payout status"}, status=500)
+
+        payout_data = status_response.json()
+        status = payout_data.get("status")
+        channel_provider = payout_data.get("channelProvider")
+
+        # Update local Transaction
+        transaction = Transaction.objects.get(reference=order_reference)
+        transaction.status = status.lower()
+        transaction.description += f" | via {channel_provider}"
+        transaction.save()
+
+        # Send success email if status is SUCCESS
+        if status == "SUCCESS":
+            send_mail(
+                subject="Payout Successful",
+                message=f"Dear {transaction.user.username},\n\nYour payout of {transaction.amount} TZS to {channel_provider} was successful.\n\nOrder Ref: {order_reference}",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[transaction.user.email],
+                fail_silently=False,
+            )
+
+        return Response({
+            "orderReference": payout_data["orderReference"],
+            "amount": payout_data["amount"],
+            "currency": payout_data["currency"],
+            "status": payout_data["status"],
+            "channel": payout_data["channel"],
+            "channelProvider": payout_data["channelProvider"],
+            "fee": payout_data["fee"],
+            "createdAt": payout_data["createdAt"],
+            "updatedAt": payout_data["updatedAt"],
+        })
+
+    except Transaction.DoesNotExist:
+        return Response({"error": "Transaction not found"}, status=404)
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)

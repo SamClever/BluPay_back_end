@@ -10,6 +10,11 @@ from .views import (
     search_account,
     initiate_transfer,
     confirm_transfer,
+    topup_view, 
+    clickpesa_webhook,
+    mobile_money_payout_view,
+    query_payout_status
+    
 )
 
 urlpatterns = [
@@ -19,8 +24,15 @@ urlpatterns = [
     path('transfer/initiate/',         initiate_transfer, name='api-initiate-transfer'),
     path('transfer/<str:tx_id>/',      transaction_detail,name='api-transaction-detail'),
     path('transfer/<str:tx_id>/confirm/', confirm_transfer,name='api-confirm-transfer'),
-    
-    
+
+
+    #Top up API andpoints
+    path("topup/", topup_view, name="topup_view"),
+    path("webhook/clickpesa/", clickpesa_webhook, name="clickpesa_webhook"),
+    path("payout/", mobile_money_payout_view, name="payout" ),
+    path("payout/status/<str:order_reference>/", query_payout_status, name="payout_status"),
+
+
     # VirtualCard endpoints
     path('virtualcards/', virtualcard, name='virtualcard_list'),
     path('virtualcards/<uuid:pk>/', virtualcard_detail, name='virtualcard_detail'),

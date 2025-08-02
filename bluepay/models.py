@@ -109,6 +109,7 @@ class Transaction(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="user")
     amount = models.DecimalField(max_digits=12, decimal_places=2,default=0.00)
     description = models.CharField(max_length=1000, null=True, blank=True)
+    reference = models.CharField(max_length=50, unique=True, null=True, blank=True)
 
     reciver = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="reciver")
     sender = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="sender")
