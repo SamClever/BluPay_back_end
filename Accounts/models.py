@@ -4,6 +4,9 @@ from userAccount.models import User
 from shortuuid.django_fields import ShortUUIDField
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from typing import Dict, Optional, Tuple
+from decimal import Decimal
+
 
 ACCOUNT_STATUS = (
     ("active", "Active"),
@@ -57,27 +60,80 @@ class Account(models.Model):
     kyc_confirmed = models.BooleanField(default=False)
 
 
-    # Add these two fields:
+    # Biometric authentication fields
     fingerprint_enabled = models.BooleanField(default=False)
     fingerprint_secret  = models.CharField(max_length=64, null=True, blank=True)
-
-
     faceid_enabled = models.BooleanField(default=False)
     faceid_secret  = models.CharField(max_length=64, null=True, blank=True)
+
+    # Transaction limits based on KYC status
+    daily_limit = models.DecimalField(max_digits=12, decimal_places=2, default=50000.00)
+    monthly_limit = models.DecimalField(max_digits=12, decimal_places=2, default=200000.00)
+    single_transaction_limit = models.DecimalField(max_digits=12, decimal_places=2, default=20000.00)
 
     recommended_by = models.ForeignKey(
         User,
         on_delete=models.DO_NOTHING,
         blank=True,
         null=True,
-        related_name="recommended_accounts"  # Updated related_name for clarity
+        related_name="recommended_accounts"
     )
 
     class Meta:
         ordering = ['-date']
 
     def __str__(self):
-        return f"{self.user}"
+        return f"{self.user.email} - {self.account_number}"
+
+    @property
+    def has_kyc_attachments(self):
+        """Check if account has KYC with required attachments"""
+        try:
+            kyc = self.kyc
+            return bool(kyc.identity_image and kyc.selfie_image)
+        except KYC.DoesNotExist:
+            return False
+
+    @property
+    def kyc_completion_percentage(self):
+        """Calculate KYC completion percentage"""
+        try:
+            kyc = self.kyc
+            total_fields = 12
+            completed_fields = 0
+            
+            if kyc.First_name: completed_fields += 1
+            if kyc.Last_name: completed_fields += 1
+            if kyc.date_of_birth: completed_fields += 1
+            if kyc.gender: completed_fields += 1
+            if kyc.identity_type: completed_fields += 1
+            if kyc.identity_image: completed_fields += 1
+            if kyc.selfie_image: completed_fields += 1
+            if kyc.address_line1: completed_fields += 1
+            if kyc.city: completed_fields += 1
+            if kyc.state: completed_fields += 1
+            if kyc.country: completed_fields += 1
+            if kyc.mobile: completed_fields += 1
+            
+            return round((completed_fields / total_fields) * 100, 2)
+        except KYC.DoesNotExist:
+            return 0.0
+
+    def update_transaction_limits(self):
+        """Update transaction limits based on KYC status"""
+        if self.kyc_confirmed:
+            self.daily_limit = Decimal('1000000.00')  # 1M TZS
+            self.monthly_limit = Decimal('10000000.00')  # 10M TZS
+            self.single_transaction_limit = Decimal('1000000.00')  # 1M TZS
+        elif self.kyc_submitted:
+            self.daily_limit = Decimal('100000.00')  # 100K TZS
+            self.monthly_limit = Decimal('1000000.00')  # 1M TZS
+            self.single_transaction_limit = Decimal('50000.00')  # 50K TZS
+        else:
+            self.daily_limit = Decimal('50000.00')  # 50K TZS
+            self.monthly_limit = Decimal('200000.00')  # 200K TZS
+            self.single_transaction_limit = Decimal('20000.00')  # 20K TZS
+        self.save()
 
 @receiver(post_save, sender=User)
 def create_account(sender, instance, created, **kwargs):
@@ -144,8 +200,6 @@ class KYC(models.Model):
     
     # Contact Details
     mobile = models.CharField(max_length=20)
-    
-    
     date = models.DateTimeField(auto_now_add=True)
     
     class Meta:
@@ -155,18 +209,42 @@ class KYC(models.Model):
     
     def __str__(self):
         return f"KYC for {self.user.email}"
-    
 
+    @property
+    def has_required_attachments(self):
+        """Check if KYC has all required attachments"""
+        return bool(self.identity_image and self.selfie_image)
+
+    @property
+    def is_complete(self):
+        """Check if KYC is complete with all required fields"""
+        required_fields = [
+            self.First_name, self.Last_name, self.date_of_birth,
+            self.gender, self.identity_type, self.identity_image,
+            self.selfie_image, self.address_line1, self.city,
+            self.state, self.country, self.mobile
+        ]
+        return all(field for field in required_fields)
 
     def save(self, *args, **kwargs):
+        # Auto-link to account if not already linked
+        if not self.account and self.user:
+            try:
+                self.account = Account.objects.get(user=self.user)
+            except Account.DoesNotExist:
+                pass
+        
         # Compute biometric hash if selfie_image is provided
         if self.selfie_image:
             try:
-                # Open the image file; ensure the file is read in binary mode.
                 self.selfie_image.open()
                 data = self.selfie_image.read()
                 self.biometric_hash = hashlib.sha256(data).hexdigest()
             except Exception as e:
-                # Optionally, log error or set biometric_hash to None if processing fails
                 self.biometric_hash = None
+        
         super().save(*args, **kwargs)
+        
+        # Update account transaction limits when KYC status changes
+        if self.account:
+            self.account.update_transaction_limits()

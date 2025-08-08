@@ -13,7 +13,9 @@ from .views import (
       enable_fingerprint,
       fingerprint_login,
       enable_faceid,
-      faceid_login
+      faceid_login,
+      account_summary,
+      update_account_limits
 )
 
 from django.conf import settings
@@ -21,6 +23,8 @@ from django.conf.urls.static import static
 urlpatterns = [
     # Account endpoints
     path('accounts/', view_account, name='view_account'),
+    path('accounts/summary/', account_summary, name='account_summary'),
+    path('accounts/update-limits/', update_account_limits, name='update_account_limits'),
     path('account/set-pin/', set_pin, name='account-set-pin'),
     path('account/enable-fingerprint/', enable_fingerprint, name='enable-fingerprint'),
     path('auth/fingerprint-login/',     fingerprint_login,   name='fingerprint-login'),

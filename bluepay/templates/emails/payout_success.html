@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Payout Successful</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #28a745; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
+        .content { padding: 20px; background-color: #f8f9fa; }
+        .success-box { background-color: #d4edda; border: 1px solid #c3e6cb; padding: 15px; border-radius: 5px; margin: 15px 0; }
+        .amount { font-size: 24px; font-weight: bold; color: #28a745; text-align: center; margin: 20px 0; }
+        .details { background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0; }
+        .footer { text-align: center; padding: 20px; color: #666; }
+        .button { display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✅ Payout Successful!</h1>
+        </div>
+        
+        <div class="content">
+            <div class="success-box">
+                <p><strong>Great news!</strong> Your payout has been processed successfully.</p>
+            </div>
+            
+            <div class="amount">
+                {{ amount|floatformat:0 }} {{ currency|default:"TZS" }}
+            </div>
+            
+            <div class="details">
+                <h3>Payout Details:</h3>
+                <p><strong>Order Reference:</strong> {{ order_reference }}</p>
+                <p><strong>Recipient:</strong> {{ beneficiary_name }}</p>
+                <p><strong>Phone Number:</strong> {{ beneficiary_phone }}</p>
+                <p><strong>Provider:</strong> {{ channel_provider }}</p>
+                <p><strong>Transaction Fee:</strong> {{ fee|floatformat:0 }} {{ currency|default:"TZS" }}</p>
+                <p><strong>Total Deducted:</strong> {{ total_amount|floatformat:0 }} {{ currency|default:"TZS" }}</p>
+                <p><strong>Date & Time:</strong> {{ date }}</p>
+                <p><strong>New Balance:</strong> {{ new_balance|floatformat:0 }} {{ currency|default:"TZS" }}</p>
+            </div>
+            
+            <p>Dear {{ user.get_full_name|default:user.email }},</p>
+            
+            <p>Your payout request has been processed successfully! The funds have been sent to the specified mobile money account.</p>
+            
+            <p><strong>What happens next:</strong></p>
+            <ul>
+                <li>The recipient will receive the money in their mobile wallet</li>
+                <li>They may receive an SMS confirmation from their mobile money provider</li>
+                <li>The transaction is now complete</li>
+            </ul>
+            
+            <div style="text-align: center;">
+                <a href="#" class="button">View Transaction History</a>
+            </div>
+            
+            <p>If you have any questions or concerns, please don't hesitate to contact our support team.</p>
+            
+            <p>Thank you for using BluPay!</p>
+            
+            <p>Best regards,<br>The BluPay Team</p>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2024 BluPay. All rights reserved.</p>
+            <p>This is an automated message. Please do not reply to this email.</p>
+        </div>
+    </div>
+</body>
+</html>

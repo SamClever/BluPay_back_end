@@ -10,10 +10,19 @@ from .views import (
     search_account,
     initiate_transfer,
     confirm_transfer,
-    topup_view, 
     clickpesa_webhook,
-    mobile_money_payout_view,
-    query_payout_status
+    initiate_topup,
+    check_payment_methods,
+    topup_status,
+    topup_history,
+    topup_limits,
+    # Payout views
+    preview_payout,
+    initiate_payout,
+    payout_status,
+    payout_history,
+    payout_limits,
+    clickpesa_payout_webhook
     
 )
 
@@ -27,10 +36,29 @@ urlpatterns = [
 
 
     #Top up API andpoints
-    path("topup/", topup_view, name="topup_view"),
-    path("webhook/clickpesa/", clickpesa_webhook, name="clickpesa_webhook"),
-    path("payout/", mobile_money_payout_view, name="payout" ),
-    path("payout/status/<str:order_reference>/", query_payout_status, name="payout_status"),
+    path('topup/initiate/', initiate_topup, name='initiate_topup'),
+    path('topup/methods/', check_payment_methods, name='check_payment_methods'),
+    path('topup/status/<str:order_reference>/', topup_status, name='topup_status'),
+    path('topup/history/', topup_history, name='topup_history'),
+    path('topup/limits/', topup_limits, name='topup_limits'),
+
+
+
+    # Payout endpoints
+    path('payout/preview/', preview_payout, name='preview_payout'),
+    path('payout/initiate/', initiate_payout, name='initiate_payout'),
+    path('payout/status/<str:order_reference>/', payout_status, name='payout_status'),
+    path('payout/history/', payout_history, name='payout_history'),
+    path('payout/limits/', payout_limits, name='payout_limits'),
+
+
+    # Webhook endpoints
+    path('webhooks/clickpesa/', clickpesa_webhook, name='clickpesa_webhook'),
+    path('webhooks/clickpesa-payout/', clickpesa_payout_webhook, name='clickpesa_payout_webhook'),
+
+
+
+    
 
 
     # VirtualCard endpoints

@@ -20,6 +20,13 @@ import pycountry  # Removed as it is not accessed
 from .utils                        import compare_faces_aws
 import uuid
 from django.conf import settings
+from decimal import Decimal
+from bluepay.models import *
+
+import logging
+logger = logging.getLogger(__name__)
+from bluepay.models import  Payment, PaymentStatusHistory, MobileMoneyProvider, Transaction
+
 # -----------------------------------------------------------------------------
 # Account API Endpoint
 # -----------------------------------------------------------------------------
@@ -310,7 +317,8 @@ def kyc_step5_view(request):
     """
     acct = get_object_or_404(Account, user=request.user)
 
-    kyc = get_object_or_404(KYC, user=request.user, account=acct)
+    # Don't require account match immediately
+    kyc = KYC.objects.filter(user=request.user).first()
 
     
     if not acct.kyc_submitted:
@@ -597,54 +605,197 @@ SERVICES = [
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def dashboard(request):
-    # Get the current user from the request.
+    """Enhanced dashboard with comprehensive user data"""
     user = request.user
-    # Although the permission ensures the user is authenticated,
+    
     if not user.is_authenticated:
         return Response(
             {"detail": "User not authenticated. You need to log in."},
             status=status.HTTP_401_UNAUTHORIZED
         )
 
+    # Get account
+    account = get_object_or_404(Account, user=user)
     
-    # Ensure a KYC record exists for this user.
+    # Get KYC if exists
     try:
         kyc = KYC.objects.get(user=user)
+        kyc_data = KYCSerializer(kyc, context={'request': request}).data
     except KYC.DoesNotExist:
-        return Response(
-            {"detail": "You need to submit your KYC."},
-            status=status.HTTP_404_NOT_FOUND
-        )
+        kyc_data = None
 
-    # Retrieve the associated account.
-    account = get_object_or_404(Account, user=user)
+    # Get recent transactions
+    recent_transactions = Transaction.objects.filter(
+        reciver_account=account
+    ).order_by('-created_at')[:5]
 
-    # Assuming Transaction and CreditCard models exist and corresponding serializers are set up.
-    # recent_transfer = Transaction.objects.filter(
-    #     sender=user, transaction_type="transfer", status="completed"
-    # ).order_by("-id").first()
-    # recent_received_transfer = Transaction.objects.filter(
-    #     reciver=user, transaction_type="transfer"
-    # ).order_by("-id").first()
+    # Get recent payments
+    recent_payments = Payment.objects.filter(
+        account=account
+    ).order_by('-created_at')[:5]
 
-    # sender_transactions = Transaction.objects.filter(sender=user, transaction_type="transfer").order_by("-id")
-    # receiver_transactions = Transaction.objects.filter(reciver=user, transaction_type="transfer").order_by("-id")
-    # request_sender_transactions = Transaction.objects.filter(sender=user, transaction_type="request")
-    # request_receiver_transactions = Transaction.objects.filter(reciver=user, transaction_type="request")
-    # credit_cards = CreditCard.objects.filter(user=user).order_by("-id")
-        
+    # Calculate daily usage
+    today = timezone.now().date()
+    daily_usage = Transaction.objects.filter(
+        reciver_account=account,
+        status='completed',
+        created_at__date=today
+    ).aggregate(
+        total=models.Sum('amount')
+    )['total'] or Decimal('0')
+
+    # Calculate monthly usage
+    current_month = timezone.now().replace(day=1).date()
+    monthly_usage = Transaction.objects.filter(
+        reciver_account=account,
+        status='completed',
+        created_at__date__gte=current_month
+    ).aggregate(
+        total=models.Sum('amount')
+    )['total'] or Decimal('0')
+
     data = {
-        "account": AccountSerializer(account).data,
-        "kyc": KYCSerializer(kyc, context={'request': request}).data,
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "full_name": user.get_full_name() or user.email,
+            "date_joined": user.date_joined,
+        },
+        "account": AccountSerializer(account, context={'request': request}).data,
+        "kyc": kyc_data,
+        "has_kyc": kyc_data is not None,
+        "kyc_completion_percentage": account.kyc_completion_percentage,
+        "transaction_limits": {
+            "daily_limit": account.daily_limit,
+            "monthly_limit": account.monthly_limit,
+            "single_transaction_limit": account.single_transaction_limit,
+            "daily_used": daily_usage,
+            "monthly_used": monthly_usage,
+            "daily_remaining": max(Decimal('0'), account.daily_limit - daily_usage),
+            "monthly_remaining": max(Decimal('0'), account.monthly_limit - monthly_usage),
+        },
         "quick_actions": QUICK_ACTIONS,
-        "services":      SERVICES,
-        # "recent_transfer": TransactionSerializer(recent_transfer).data if recent_transfer else None,
-        # "recent_received_transfer": TransactionSerializer(recent_received_transfer).data if recent_received_transfer else None,
-        # "sender_transactions": TransactionSerializer(sender_transactions, many=True).data,
-        # "receiver_transactions": TransactionSerializer(receiver_transactions, many=True).data,
-        # "request_sender_transactions": TransactionSerializer(request_sender_transactions, many=True).data,
-        # "request_receiver_transactions": TransactionSerializer(request_receiver_transactions, many=True).data,
-        # "credit_cards": CreditCardSerializer(credit_cards, many=True).data,
+        "services": SERVICES,
+        "recent_transactions": TransactionSerializer(recent_transactions, many=True).data,
+        "recent_payments": PaymentSerializer(recent_payments, many=True, context={'request': request}).data,
+        "statistics": {
+            "total_transactions": Transaction.objects.filter(reciver_account=account).count(),
+            "successful_transactions": Transaction.objects.filter(reciver_account=account, status='completed').count(),
+            "total_payments": Payment.objects.filter(account=account).count(),
+            "successful_payments": Payment.objects.filter(account=account, status__in=['SUCCESS', 'SETTLED']).count(),
+        }
     }
+    
+    # Mask sensitive data in logs
+    masked_data = mask_sensitive_data(data)
+    logger.info(f"Dashboard accessed by user {user.email}")
+    
     return Response(data, status=status.HTTP_200_OK)
 
+
+
+
+
+
+# -----------------------------------------------------------------------------
+# Additional Utility Endpoints
+# -----------------------------------------------------------------------------
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def account_summary(request):
+    """Get account summary with transaction statistics"""
+    account = get_object_or_404(Account, user=request.user)
+    
+    # Get transaction statistics
+    total_transactions = Transaction.objects.filter(reciver_account=account).count()
+    successful_transactions = Transaction.objects.filter(
+        reciver_account=account, 
+        status='completed'
+    ).count()
+    
+    # Get payment statistics
+    total_payments = Payment.objects.filter(account=account).count()
+    successful_payments = Payment.objects.filter(
+        account=account, 
+        status__in=['SUCCESS', 'SETTLED']
+    ).count()
+    
+    # Calculate success rates
+    transaction_success_rate = (
+        (successful_transactions / total_transactions * 100) 
+        if total_transactions > 0 else 0
+    )
+    payment_success_rate = (
+        (successful_payments / total_payments * 100) 
+        if total_payments > 0 else 0
+    )
+    
+    return Response({
+        "account_number": account.account_number,
+        "account_balance": account.account_balance,
+        "account_status": account.account_status,
+        "kyc_status": {
+            "submitted": account.kyc_submitted,
+            "confirmed": account.kyc_confirmed,
+            "completion_percentage": account.kyc_completion_percentage
+        },
+        "transaction_statistics": {
+            "total": total_transactions,
+            "successful": successful_transactions,
+            "success_rate": round(transaction_success_rate, 2)
+        },
+        "payment_statistics": {
+            "total": total_payments,
+            "successful": successful_payments,
+            "success_rate": round(payment_success_rate, 2)
+        },
+        "limits": {
+            "daily_limit": account.daily_limit,
+            "monthly_limit": account.monthly_limit,
+            "single_transaction_limit": account.single_transaction_limit
+        }
+    }, status=status.HTTP_200_OK)
+
+
+
+
+api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def update_account_limits(request):
+    """Update account transaction limits (admin only)"""
+    if not request.user.is_staff:
+        return Response(
+            {"detail": "Permission denied. Admin access required."},
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
+    account_id = request.data.get('account_id')
+    if not account_id:
+        return Response(
+            {"error": "account_id is required"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    account = get_object_or_404(Account, id=account_id)
+    
+    # Update limits if provided
+    if 'daily_limit' in request.data:
+        account.daily_limit = Decimal(str(request.data['daily_limit']))
+    if 'monthly_limit' in request.data:
+        account.monthly_limit = Decimal(str(request.data['monthly_limit']))
+    if 'single_transaction_limit' in request.data:
+        account.single_transaction_limit = Decimal(str(request.data['single_transaction_limit']))
+    
+    account.save()
+    
+    logger.info(f"Account limits updated for {account.user.email} by admin {request.user.email}")
+    
+    return Response({
+        "message": "Account limits updated successfully",
+        "limits": {
+            "daily_limit": account.daily_limit,
+            "monthly_limit": account.monthly_limit,
+            "single_transaction_limit": account.single_transaction_limit
+        }
+    }, status=status.HTTP_200_OK)

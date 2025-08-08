@@ -18,14 +18,6 @@ import json
 from decimal import Decimal
 from Accounts.models import *
 from bluepay.models import *
-from bluepay.models import (
-    Transaction,
-    Notification,
-    VirtualCard,
-    PaymentTransaction,
-    NFCDevice,
-    PaymentToken,
-)
 from .serializers import (
     VirtualCardSerializer,
     PaymentTransactionSerializer,
@@ -36,9 +28,42 @@ from .serializers import (
     InitiateTransferSerializer,
     TransactionSerializer,
     ConfirmTransferSerializer,
+    MobileMoneyProviderSerializer,
+    PaymentStatusHistorySerializer,
+    PaymentSerializer,
+    PaymentStatusQuerySerializer,
+    InitiateMobileMoneyPaymentSerializer,
+    PaymentSummarySerializer,
+    BulkPaymentStatusSerializer,
+    TopupRequestSerializer,
+    TopupResponseSerializer,
+    PayoutStatusHistorySerializer,
+    PayoutSerializer,
+    PayoutRequestSerializer,
+    PayoutPreviewSerializer,
+    PayoutSummarySerializer
+
+
+
+
+
+
 )
 from django.utils.crypto import get_random_string
 import requests
+import pycountry
+from .utils import validate_phone_number, validate_tanzanian_phone, generate_transaction_reference, mask_sensitive_data, get_available_payment_methods
+import uuid
+from django.conf import settings
+from django.db import transaction as db_transaction
+from django.utils import timezone
+from datetime import datetime, timedelta
+import logging
+import re
+from django.db import models
+from django.views.decorators.csrf import csrf_exempt
+
+
 
 def index(request):
     return render(request, "index.html")
@@ -399,268 +424,1194 @@ def confirm_transfer(request, tx_id):
 
 
 
-def get_clickpesa_token():
-    response = requests.post(
-        "https://api.clickpesa.com/third-parties/generate-token",
-        headers={
-            "client-id": settings.CLICKPESA_CLIENT_ID,
-            "api-key": settings.CLICKPESA_API_KEY,
-        },
-    )
-    if response.status_code == 200:
-        return response.json().get("token")
-    raise Exception("Failed to authenticate with ClickPesa")
 
 
 
-@api_view(["POST"])
+
+# -----------------------------------------------------------------------------
+# Top-up API Endpoints
+# -----------------------------------------------------------------------------
+
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def topup_view(request):
-    amount = request.data.get("amount")
-    phone = request.data.get("phone")
+def initiate_topup(request):
+    """
+    Initiate a top-up transaction using ClickPesa USSD push
+    """
+    # Validate input data
+    serializer = TopupRequestSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    if not amount or not phone:
-        return Response({"error": "Amount and phone are required."}, status=400)
-
-    account = Account.objects.get(user=request.user)
-    order_ref = "BLU" + get_random_string(10).upper()
+    validated_data = serializer.validated_data
+    amount = validated_data['amount']
+    phone = validated_data['phone']
 
     try:
-        token = get_clickpesa_token()
-
-        # Preview
-        preview = requests.post(
-            "https://api.clickpesa.com/third-parties/payments/preview-ussd-push-request",
-            json={"amount": str(amount), "currency": "TZS", "orderReference": order_ref},
-            headers={"Authorization": token}
-        )
-        if preview.status_code != 200:
-            return Response({"error": "Preview failed"}, status=500)
-
-        # Initiate USSD Push
-        push = requests.post(
-            "https://api.clickpesa.com/third-parties/payments/initiate-ussd-push-request",
-            json={
-                "amount": str(amount),
-                "currency": "TZS",
-                "orderReference": order_ref,
-                "phoneNumber": phone
-            },
-            headers={"Authorization": token}
-        )
-        if push.status_code != 200:
-            return Response({"error": "Push failed"}, status=500)
-
-        # Log pending transaction
-        Transaction.objects.create(
-            user=request.user,
-            amount=amount,
-            description=f"Top-up via ClickPesa | OrderRef: {order_ref}",
-            reciver=request.user,
+        # Get user account
+        account = get_object_or_404(Account, user=request.user)
+        
+        # Check if account is active
+        if account.account_status != 'active':
+            return Response(
+                {"error": "Account must be active to perform top-ups"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Check transaction limits
+        if amount > account.single_transaction_limit:
+            return Response(
+                {
+                    "error": f"Amount exceeds single transaction limit of {account.single_transaction_limit} TZS",
+                    "limit": account.single_transaction_limit
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Check daily limit
+        today = timezone.now().date()
+        daily_usage = Transaction.objects.filter(
             reciver_account=account,
-            status="pending",
-            transaction_type="recieved",
-            reference=order_ref  # Add this field to track
+            transaction_type='recieved',
+            status='completed',
+            date__date=today
+        ).aggregate(total=models.Sum('amount'))['total'] or Decimal('0')
+        
+        if daily_usage + amount > account.daily_limit:
+            return Response(
+                {
+                    "error": f"Amount exceeds daily limit. Used: {daily_usage} TZS, Limit: {account.daily_limit} TZS",
+                    "daily_used": daily_usage,
+                    "daily_limit": account.daily_limit,
+                    "remaining": account.daily_limit - daily_usage
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Check KYC requirements for large amounts
+        if amount > 50000 and not account.kyc_confirmed:
+            return Response(
+                {"error": "KYC verification required for amounts above 50,000 TZS"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Generate unique order reference
+        order_ref = generate_transaction_reference("BLU")
+        
+        # Create payment record using atomic transaction
+        with db_transaction.atomic():
+            # Create Payment record
+            payment = Payment.objects.create(
+                payment_reference=f"PAY_{order_ref}",
+                order_reference=order_ref,
+                account=account,
+                transaction_type='DEPOSIT',
+                payment_method='MOBILE_MONEY',
+                amount=amount,
+                currency='TZS',
+                customer_name=request.user.get_full_name() or request.user.email,
+                customer_phone=phone,
+                customer_email=request.user.email,
+                status='PENDING',
+                phone_number=phone,
+                ussd_push_initiated=False,
+                message="Payment initiated"
+            )
+            
+            # Create legacy Transaction record for backward compatibility
+            transaction_record = Transaction.objects.create(
+                user=request.user,
+                amount=amount,
+                description=f"Top-up via ClickPesa | OrderRef: {order_ref}",
+                reciver=request.user,
+                reciver_account=account,
+                status="pending",
+                transaction_type="recieved",
+                reference=order_ref,
+                payment=payment
+            )
+            
+            # Initiate ClickPesa payment
+            success, result_data = payment.initiate_clickpesa_payment()
+            
+            if not success:
+                logger.error(f"ClickPesa payment initiation failed for {order_ref}: {result_data}")
+                return Response(
+                    {"error": "Payment initiation failed", "details": result_data},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+            
+            # Create payment status history
+            PaymentStatusHistory.objects.create(
+                payment=payment,
+                previous_status=None,
+                new_status=payment.status,
+                message="USSD push initiated successfully"
+            )
+        
+        # Prepare response
+        response_data = {
+            "message": "USSD push initiated successfully. Please check your phone for the payment prompt.",
+            "order_reference": order_ref,
+            "amount": str(amount),
+            "phone": phone,
+            "status": payment.status,
+            "channel": payment.metadata.get('channel'),
+            "transaction_id": payment.clickpesa_transaction_id,
+            "instructions": "You will receive a USSD prompt on your phone. Follow the instructions to complete the payment."
+        }
+        
+        logger.info(f"Top-up initiated successfully: {order_ref} for user {request.user.email}")
+        return Response(response_data, status=status.HTTP_201_CREATED)
+        
+    except Account.DoesNotExist:
+        return Response(
+            {"error": "Account not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    except Exception as e:
+        logger.error(f"Unexpected error in topup initiation: {e}")
+        return Response(
+            {"error": "Internal server error", "details": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
-        return Response({"message": "USSD push initiated", "orderReference": order_ref, "CLickpesatoken": token})
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def check_payment_methods(request):
+    """
+    Check available payment methods for a given amount
+    """
+    amount = request.GET.get('amount')
+    if not amount:
+        return Response(
+            {"error": "Amount parameter is required"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    try:
+        amount = Decimal(amount)
+        if amount < 1000:
+            return Response(
+                {"error": "Minimum amount is 1,000 TZS"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    except (ValueError, TypeError):
+        return Response(
+            {"error": "Invalid amount format"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    methods_data = get_available_payment_methods(amount, "TZS")
+    return Response(methods_data, status=status.HTTP_200_OK)
+
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def topup_status(request, order_reference):
+    """
+    Check the status of a specific top-up transaction
+    """
+    try:
+        # Get payment from database
+        payment = Payment.objects.get(
+            order_reference=order_reference,
+            account__user=request.user
+        )
+        
+        # Query ClickPesa for latest status
+        success, api_data = payment.query_clickpesa_status()
+        
+        # Serialize payment data
+        serializer = PaymentSerializer(payment, context={'request': request})
+        
+        response_data = {
+            "payment": serializer.data,
+            "api_data": api_data if success else None,
+            "updated_from_api": success
+        }
+        
+        return Response(response_data, status=status.HTTP_200_OK)
+        
+    except Payment.DoesNotExist:
+        return Response(
+            {"error": "Payment not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
     except Exception as e:
-        return Response({"error": str(e)}, status=500)
+        logger.error(f"Error checking payment status: {e}")
+        return Response(
+            {"error": "Internal server error"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def topup_history(request):
+    """
+    Get user's top-up transaction history
+    """
+    account = get_object_or_404(Account, user=request.user)
+    
+    # Get query parameters
+    page = int(request.GET.get('page', 1))
+    page_size = min(int(request.GET.get('page_size', 20)), 100)
+    status_filter = request.GET.get('status')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    
+    # Base query for top-up payments
+    payments = Payment.objects.filter(
+        account=account,
+        transaction_type='DEPOSIT'
+    ).order_by('-created_at')
+    
+    # Apply filters
+    if status_filter:
+        payments = payments.filter(status=status_filter.upper())
+    
+    if start_date:
+        try:
+            start_date = datetime.fromisoformat(start_date.replace('Z', '+00:00'))
+            payments = payments.filter(created_at__gte=start_date)
+        except ValueError:
+            return Response(
+                {"error": "Invalid start_date format. Use ISO format."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
+    if end_date:
+        try:
+            end_date = datetime.fromisoformat(end_date.replace('Z', '+00:00'))
+            payments = payments.filter(created_at__lte=end_date)
+        except ValueError:
+            return Response(
+                {"error": "Invalid end_date format. Use ISO format."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
+    # Pagination
+    total_count = payments.count()
+    start_idx = (page - 1) * page_size
+    end_idx = start_idx + page_size
+    payments = payments[start_idx:end_idx]
+    
+    # Serialize data
+    serializer = PaymentSerializer(payments, many=True, context={'request': request})
+    
+    # Calculate statistics
+    stats = Payment.objects.filter(
+        account=account,
+        transaction_type='DEPOSIT'
+    ).aggregate(
+        total_amount=models.Sum('amount'),
+        successful_amount=models.Sum('collected_amount', filter=models.Q(status__in=['SUCCESS', 'SETTLED'])),
+        total_count=models.Count('id'),
+        successful_count=models.Count('id', filter=models.Q(status__in=['SUCCESS', 'SETTLED']))
+    )
+    
+    return Response({
+        "count": total_count,
+        "page": page,
+        "page_size": page_size,
+        "results": serializer.data,
+        "statistics": {
+            "total_amount": stats['total_amount'] or 0,
+            "successful_amount": stats['successful_amount'] or 0,
+            "total_transactions": stats['total_count'] or 0,
+            "successful_transactions": stats['successful_count'] or 0,
+            "success_rate": round(
+                (stats['successful_count'] / stats['total_count'] * 100) 
+                if stats['total_count'] > 0 else 0, 2
+            )
+        }
+    }, status=status.HTTP_200_OK)
 
-
-from django.views.decorators.csrf import csrf_exempt
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def topup_limits(request):
+    """
+    Get top-up limits and current usage for the user
+    """
+    account = get_object_or_404(Account, user=request.user)
+    
+    # Calculate current usage
+    today = timezone.now().date()
+    current_month = timezone.now().replace(day=1).date()
+    
+    daily_used = Transaction.objects.filter(
+        reciver_account=account,
+        transaction_type='recieved',
+        status='completed',
+        date__date=today
+    ).aggregate(total=models.Sum('amount'))['total'] or Decimal('0')
+    
+    monthly_used = Transaction.objects.filter(
+        reciver_account=account,
+        transaction_type='recieved',
+        status='completed',
+        date__date__gte=current_month
+    ).aggregate(total=models.Sum('amount'))['total'] or Decimal('0')
+    
+    return Response({
+        "limits": {
+            "daily_limit": account.daily_limit,
+            "monthly_limit": account.monthly_limit,
+            "single_transaction_limit": account.single_transaction_limit,
+            "minimum_amount": 1000
+        },
+        "usage": {
+            "daily_used": daily_used,
+            "monthly_used": monthly_used,
+            "daily_remaining": max(Decimal('0'), account.daily_limit - daily_used),
+            "monthly_remaining": max(Decimal('0'), account.monthly_limit - monthly_used)
+        },
+        "kyc_status": {
+            "kyc_submitted": account.kyc_submitted,
+            "kyc_confirmed": account.kyc_confirmed,
+            "account_status": account.account_status
+        },
+        "payment_methods_info": {
+            "supported_operators": ["M-PESA", "TIGO-PESA", "AIRTEL-MONEY"],
+            "currency": "TZS",
+            "processing_time": "Instant to 5 minutes"
+        }
+    }, status=status.HTTP_200_OK)
 
 @csrf_exempt
 @api_view(["POST"])
 def clickpesa_webhook(request):
-    data = request.data
-    order_ref = data.get("orderReference")
-    status_code = data.get("status")
-
-    if not order_ref or not status_code:
-        return Response({"error": "Invalid payload"}, status=400)
-
+    """
+    Enhanced webhook handler for ClickPesa payment notifications
+    """
     try:
-        transaction = Transaction.objects.get(reference=order_ref)
-        user = transaction.reciver  # or transaction.user
-
-        if status_code in ["SUCCESS", "SETTLED"]:
-            transaction.status = "completed"
-            transaction.reciver_account.account_balance += transaction.amount
-            transaction.reciver_account.save()
-
-            # Send success email
-            html_content = render_to_string("emails/topup_success.html", {
-                "user": user,
-                "amount": transaction.amount,
-                "order_reference": order_ref,
-                "new_balance": transaction.reciver_account.account_balance,
-                "date": now().strftime("%Y-%m-%d %H:%M"),
-            })
-
-            email = EmailMultiAlternatives(
-                subject="BluPay Top-Up Successful",
-                body="Your top-up was successful.",
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                to=[user.email],
+        data = request.data
+        order_ref = data.get("orderReference")
+        status_code = data.get("status")
+        
+        # Log the webhook data (masked for security)
+        masked_data = mask_sensitive_data(data)
+        logger.info(f"Received ClickPesa webhook: {masked_data}")
+        
+        # Validate required fields
+        if not order_ref or not status_code:
+            logger.warning(f"Invalid webhook payload: missing orderReference or status")
+            return Response(
+                {"error": "Invalid payload - missing orderReference or status"},
+                status=status.HTTP_400_BAD_REQUEST
             )
-            email.attach_alternative(html_content, "text/html")
-            email.send(fail_silently=True)
-        else:
-            transaction.status = "failed"
-
-        transaction.save()
-        return Response({"message": "Webhook processed"}, status=200)
-
-    except Transaction.DoesNotExist:
-        return Response({"error": "Transaction not found"}, status=404)
-
-
-
-def generate_checksum(payload: dict, checksum_key: str):
-    # Step 1: Sort payload keys
-    sorted_payload = {k: payload[k] for k in sorted(payload)}
-
-    # Step 2: Concatenate values into a string
-    payload_string = "".join(str(value) for value in sorted_payload.values())
-
-    # Step 3: HMAC-SHA256 hash
-    return hmac.new(checksum_key.encode(), payload_string.encode(), hashlib.sha256).hexdigest()
-
-
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
-def mobile_money_payout_view(request):
-    amount = request.data.get("amount")
-    phone = request.data.get("phone")
-
-    if not amount or not phone:
-        return Response({"error": "Amount and phone are required."}, status=400)
-
-    user = request.user
-    account = Account.objects.get(user=user)
-
-    if account.account_balance < float(amount):
-        return Response({"error": "Insufficient funds"}, status=400)
-
-    order_ref = "BLUPAY-WD-" + get_random_string(10).upper()
-    payout_payload = {
-        "amount": str(amount),
-        "phoneNumber": phone,
-        "currency": "TZS",
-        "orderReference": order_ref
-    }
-
-    # Add checksum
-    # Generate checksum using the correct method
-    checksum = generate_checksum(payout_payload, settings.CLICKPESA_API_KEY)
-    payout_payload["checksum"] = checksum
-
-    try:
-        token = get_clickpesa_token()
-
-        # Preview
-        preview = requests.post(
-            "https://api.clickpesa.com/third-parties/payouts/preview-mobile-money-payout",
-            json=payout_payload,
-            headers={"Authorization": token}
+        
+        # Store webhook data first
+        webhook = PaymentWebhook.objects.create(
+            order_reference=order_ref,
+            webhook_data=data
         )
-        if preview.status_code != 200:
-            return Response({"error": "Payout preview failed"}, status=500)
-
-        # Create Payout
-        payout = requests.post(
-            "https://api.clickpesa.com/third-parties/payouts/create-mobile-money-payout",
-            json=payout_payload,
-            headers={"Authorization": token}
+        
+        # Process the webhook
+        with db_transaction.atomic():
+            try:
+                # Get payment record
+                payment = Payment.objects.select_for_update().get(order_reference=order_ref)
+                webhook.payment = payment
+                webhook.save()
+                
+                # Get legacy transaction record
+                try:
+                    transaction_record = Transaction.objects.select_for_update().get(reference=order_ref)
+                except Transaction.DoesNotExist:
+                    # Create transaction record if it doesn't exist
+                    transaction_record = Transaction.objects.create(
+                        user=payment.account.user,
+                        amount=payment.amount,
+                        description=f"Top-up via ClickPesa | OrderRef: {order_ref}",
+                        reciver=payment.account.user,
+                        reciver_account=payment.account,
+                        status="pending",
+                        transaction_type="recieved",
+                        reference=order_ref,
+                        payment=payment
+                    )
+                
+                old_status = payment.status
+                user = payment.account.user
+                
+                # Update payment and transaction based on status
+                if status_code in ["SUCCESS", "SETTLED"]:
+                    # Update payment
+                    payment.status = "SUCCESS"
+                    payment.collected_amount = data.get("collectedAmount", payment.amount)
+                    payment.collected_currency = data.get("collectedCurrency", "TZS")
+                    payment.message = data.get("message", "Payment completed successfully")
+                    payment.clickpesa_updated_at = timezone.now()
+                    
+                    # Update customer info if provided
+                    if "customer" in data:
+                        customer = data["customer"]
+                        if "customerName" in customer:
+                            payment.customer_name = customer["customerName"]
+                        if "customerPhoneNumber" in customer:
+                            payment.customer_phone = customer["customerPhoneNumber"]
+                        if "customerEmail" in customer:
+                            payment.customer_email = customer["customerEmail"]
+                    
+                    payment.save()
+                    
+                    # Update legacy transaction
+                    transaction_record.status = "completed"
+                    transaction_record.save()
+                    
+                    # Update account balance
+                    collected_amount = payment.collected_amount or payment.amount
+                    payment.account.account_balance += collected_amount
+                    payment.account.save()
+                    
+                    # Create status history
+                    PaymentStatusHistory.objects.create(
+                        payment=payment,
+                        previous_status=old_status,
+                        new_status="SUCCESS",
+                        message=f"Payment completed via webhook. Amount: {collected_amount} {payment.collected_currency or payment.currency}"
+                    )
+                    
+                    # Send success email
+                    try:
+                        _send_topup_success_email(user, payment, collected_amount)
+                        logger.info(f"Success email sent for topup {order_ref}")
+                    except Exception as email_error:
+                        logger.error(f"Failed to send success email for {order_ref}: {email_error}")
+                    
+                elif status_code == "FAILED":
+                    # Update payment
+                    payment.status = "FAILED"
+                    payment.message = data.get("message", "Payment failed")
+                    payment.clickpesa_updated_at = timezone.now()
+                    payment.save()
+                    
+                    # Update legacy transaction
+                    transaction_record.status = "failed"
+                    transaction_record.save()
+                    
+                    # Create status history
+                    PaymentStatusHistory.objects.create(
+                        payment=payment,
+                        previous_status=old_status,
+                        new_status="FAILED",
+                        message=f"Payment failed via webhook: {data.get('message', 'Unknown error')}"
+                    )
+                    
+                    # Send failure email
+                    try:
+                        _send_topup_failure_email(user, payment)
+                        logger.info(f"Failure email sent for topup {order_ref}")
+                    except Exception as email_error:
+                        logger.error(f"Failed to send failure email for {order_ref}: {email_error}")
+                
+                else:
+                    # Handle other statuses (PROCESSING, PENDING, etc.)
+                    payment.status = status_code
+                    payment.message = data.get("message", f"Payment status: {status_code}")
+                    payment.clickpesa_updated_at = timezone.now()
+                    payment.save()
+                    
+                    # Update legacy transaction
+                    if status_code in ["PROCESSING", "PENDING"]:
+                        transaction_record.status = "pending"
+                    else:
+                        transaction_record.status = status_code.lower()
+                    transaction_record.save()
+                    
+                    # Create status history
+                    PaymentStatusHistory.objects.create(
+                        payment=payment,
+                        previous_status=old_status,
+                        new_status=status_code,
+                        message=f"Status updated via webhook: {data.get('message', '')}"
+                    )
+                
+                # Mark webhook as processed
+                webhook.processed = True
+                webhook.save()
+                
+                logger.info(f"Webhook processed successfully for {order_ref}: {old_status} -> {payment.status}")
+                
+            except Payment.DoesNotExist:
+                logger.warning(f"Webhook received for unknown payment: {order_ref}")
+                return Response(
+                    {"error": "Payment not found", "order_reference": order_ref},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+        
+        return Response(
+            {"message": "Webhook processed successfully", "order_reference": order_ref},
+            status=status.HTTP_200_OK
         )
-        if payout.status_code != 200:
-            return Response({"error": "Payout request failed"}, status=500)
-
-        # Deduct balance & save transaction
-        account.account_balance -= float(amount)
-        account.save()
-
-        Transaction.objects.create(
-            user=user,
-            amount=amount,
-            description=f"Withdrawal to MNO via ClickPesa",
-            status="pending",
-            transaction_type="sent",
-            reference=order_ref
-        )
-
-        return Response({"message": "Payout initiated", "orderReference": order_ref})
-
+        
     except Exception as e:
-        return Response({"error": str(e)}, status=500)
+        logger.error(f"Error processing webhook: {e}")
+        return Response(
+            {"error": "Internal server error"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
-
-
-
-
-@api_view(["GET"])
-@permission_classes([IsAuthenticated])
-def query_payout_status(request, order_reference):
+def _send_topup_success_email(user, payment, amount):
+    """Send success email for completed top-up"""
     try:
-        # Get user token from ClickPesa
-        token_response = requests.post(
-            "https://api.clickpesa.com/third-parties/generate-token",
-            headers={
-                "client-id": settings.CLICKPESA_CLIENT_ID,
-                "api-key": settings.CLICKPESA_API_KEY
-            }
-        )
-        token_data = token_response.json()
-        token = token_data.get("token")
-
-        if not token:
-            return Response({"error": "Failed to get token from ClickPesa"}, status=500)
-
-        # Query payout status
-        status_response = requests.get(
-            f"https://api.clickpesa.com/third-parties/payouts/{order_reference}",
-            headers={"Authorization": f"Bearer {token}"}
-        )
-
-        if status_response.status_code != 200:
-            return Response({"error": "Failed to fetch payout status"}, status=500)
-
-        payout_data = status_response.json()
-        status = payout_data.get("status")
-        channel_provider = payout_data.get("channelProvider")
-
-        # Update local Transaction
-        transaction = Transaction.objects.get(reference=order_reference)
-        transaction.status = status.lower()
-        transaction.description += f" | via {channel_provider}"
-        transaction.save()
-
-        # Send success email if status is SUCCESS
-        if status == "SUCCESS":
-            send_mail(
-                subject="Payout Successful",
-                message=f"Dear {transaction.user.username},\n\nYour payout of {transaction.amount} TZS to {channel_provider} was successful.\n\nOrder Ref: {order_reference}",
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[transaction.user.email],
-                fail_silently=False,
-            )
-
-        return Response({
-            "orderReference": payout_data["orderReference"],
-            "amount": payout_data["amount"],
-            "currency": payout_data["currency"],
-            "status": payout_data["status"],
-            "channel": payout_data["channel"],
-            "channelProvider": payout_data["channelProvider"],
-            "fee": payout_data["fee"],
-            "createdAt": payout_data["createdAt"],
-            "updatedAt": payout_data["updatedAt"],
+        subject = "BluPay Top-Up Successful"
+        html_content = render_to_string("emails/topup_success.html", {
+            "user": user,
+            "amount": amount,
+            "currency": payment.collected_currency or payment.currency,
+            "order_reference": payment.order_reference,
+            "new_balance": payment.account.account_balance,
+            "date": timezone.now().strftime("%Y-%m-%d %H:%M"),
+            "phone": payment.phone_number,
+            "channel": payment.metadata.get('channel', 'Mobile Money'),
         })
-
-    except Transaction.DoesNotExist:
-        return Response({"error": "Transaction not found"}, status=404)
+        
+        email = EmailMultiAlternatives(
+            subject=subject,
+            body="Your top-up was successful.",
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[user.email],
+        )
+        email.attach_alternative(html_content, "text/html")
+        email.send(fail_silently=True)
+        
     except Exception as e:
-        return Response({"error": str(e)}, status=500)
+        logger.error(f"Failed to send success email: {e}")
+
+def _send_topup_failure_email(user, payment):
+    """Send failure email for failed top-up"""
+    try:
+        subject = "BluPay Top-Up Failed"
+        html_content = render_to_string("emails/topup_failed.html", {
+            "user": user,
+            "amount": payment.amount,
+            "currency": payment.currency,
+            "order_reference": payment.order_reference,
+            "reason": payment.message or "Payment processing failed",
+            "date": timezone.now().strftime("%Y-%m-%d %H:%M"),
+        })
+        
+        email = EmailMultiAlternatives(
+            subject=subject,
+            body="Your top-up attempt failed.",
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[user.email],
+        )
+        email.attach_alternative(html_content, "text/html")
+        email.send(fail_silently=True)
+        
+    except Exception as e:
+        logger.error(f"Failed to send failure email: {e}")
+
+
+
+
+# -----------------------------------------------------------------------------
+# Payout API Endpoints
+# -----------------------------------------------------------------------------
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def initiate_payout(request):
+    """
+    Initiate a payout transaction using ClickPesa mobile money
+    """
+    # Validate input data
+    serializer = PayoutRequestSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    validated_data = serializer.validated_data
+    amount = validated_data['amount']
+    phone = validated_data['phone']
+    beneficiary_name = validated_data.get('beneficiary_name', 'Beneficiary')
+
+    try:
+        # Get user account
+        account = get_object_or_404(Account, user=request.user)
+        
+        # Check if account is active
+        if account.account_status != 'active':
+            return Response(
+                {"error": "Account must be active to perform payouts"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Check KYC requirements
+        if not account.kyc_confirmed:
+            return Response(
+                {"error": "KYC verification required for payouts"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Check transaction limits
+        if amount > account.single_transaction_limit:
+            return Response(
+                {
+                    "error": f"Amount exceeds single transaction limit of {account.single_transaction_limit} TZS",
+                    "limit": account.single_transaction_limit
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Check daily limit for payouts
+        today = timezone.now().date()
+        daily_payout_usage = Payout.objects.filter(
+            account=account,
+            status='SUCCESS',
+            created_at__date=today
+        ).aggregate(total=models.Sum('amount'))['total'] or Decimal('0')
+        
+        if daily_payout_usage + amount > account.daily_limit:
+            return Response(
+                {
+                    "error": f"Amount exceeds daily payout limit. Used: {daily_payout_usage} TZS, Limit: {account.daily_limit} TZS",
+                    "daily_used": daily_payout_usage,
+                    "daily_limit": account.daily_limit,
+                    "remaining": account.daily_limit - daily_payout_usage
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Generate unique order reference
+        order_ref = generate_transaction_reference("PAYOUT")
+        
+        # Create payout record using atomic transaction
+        with db_transaction.atomic():
+            # Create Payout record
+            payout = Payout.objects.create(
+                payout_reference=f"PAYOUT_{order_ref}",
+                order_reference=order_ref,
+                account=account,
+                payout_type='WITHDRAWAL',
+                channel='MOBILE_MONEY',
+                amount=amount,
+                currency='TZS',
+                total_amount=amount,  # Will be updated after preview
+                beneficiary_name=beneficiary_name,
+                beneficiary_phone=phone,
+                beneficiary_email=request.user.email,
+                status='PENDING',
+                message="Payout initiated"
+            )
+            
+            # Initiate ClickPesa payout
+            success, result_data = payout.initiate_clickpesa_payout()
+            
+            if not success:
+                logger.error(f"ClickPesa payout initiation failed for {order_ref}: {result_data}")
+                return Response(
+                    {"error": "Payout initiation failed", "details": result_data},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+            
+            # Create payout status history
+            PayoutStatusHistory.objects.create(
+                payout=payout,
+                previous_status=None,
+                new_status=payout.status,
+                message="Payout initiated successfully"
+            )
+            
+            # Create legacy transaction record for tracking
+            Transaction.objects.create(
+                user=request.user,
+                amount=payout.total_amount,
+                description=f"Payout to {phone} | OrderRef: {order_ref}",
+                reciver=request.user,
+                reciver_account=account,
+                status="pending",
+                transaction_type="sent",
+                reference=order_ref
+            )
+        
+        # Prepare response
+        response_data = {
+            "message": "Payout initiated successfully. Processing withdrawal to mobile money.",
+            "order_reference": order_ref,
+            "amount": str(amount),
+            "fee": str(payout.fee),
+            "total_amount": str(payout.total_amount),
+            "phone": phone,
+            "status": payout.status,
+            "channel_provider": payout.channel_provider,
+            "beneficiary_name": beneficiary_name,
+            "estimated_completion": "5-15 minutes"
+        }
+        
+        logger.info(f"Payout initiated successfully: {order_ref} for user {request.user.email}")
+        return Response(response_data, status=status.HTTP_201_CREATED)
+        
+    except Account.DoesNotExist:
+        return Response(
+            {"error": "Account not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    except Exception as e:
+        logger.error(f"Unexpected error in payout initiation: {e}")
+        return Response(
+            {"error": "Internal server error", "details": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def preview_payout(request):
+    """
+    Preview payout to get fees and channel information
+    """
+    # Validate input data
+    serializer = PayoutRequestSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    validated_data = serializer.validated_data
+    amount = validated_data['amount']
+    phone = validated_data['phone']
+
+    try:
+        # Get user account
+        account = get_object_or_404(Account, user=request.user)
+        
+        # Check if account is active
+        if account.account_status != 'active':
+            return Response(
+                {"error": "Account must be active to perform payouts"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Generate temporary order reference for preview
+        temp_order_ref = generate_transaction_reference("PREVIEW")
+        
+        # Initialize ClickPesa service
+        clickpesa = ClickPesaAPI()
+        
+        # Preview the payout
+        preview_success, preview_data = clickpesa.preview_mobile_money_payout(
+            str(amount), phone, "TZS", temp_order_ref
+        )
+        
+        if not preview_success:
+            logger.error(f"Payout preview failed for {temp_order_ref}: {preview_data}")
+            return Response(
+                {"error": "Payout preview failed", "details": preview_data},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
+        # Calculate total cost
+        fee = Decimal(str(preview_data.get('fee', 0)))
+        total_amount = amount + fee
+        
+        # Check if user has sufficient balance
+        sufficient_balance = account.account_balance >= total_amount
+        
+        response_data = {
+            "amount": str(amount),
+            "fee": str(fee),
+            "total_amount": str(total_amount),
+            "currency": "TZS",
+            "channel_provider": preview_data.get('channelProvider', ''),
+            "payout_fee_bearer": preview_data.get('payoutFeeBearer', 'customer'),
+            "account_balance": str(account.account_balance),
+            "sufficient_balance": sufficient_balance,
+            "phone": phone,
+            "estimated_completion": "5-15 minutes"
+        }
+        
+        return Response(response_data, status=status.HTTP_200_OK)
+        
+    except Account.DoesNotExist:
+        return Response(
+            {"error": "Account not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    except Exception as e:
+        logger.error(f"Unexpected error in payout preview: {e}")
+        return Response(
+            {"error": "Internal server error", "details": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def payout_status(request, order_reference):
+    """
+    Check the status of a specific payout transaction
+    """
+    try:
+        # Get payout from database
+        payout = Payout.objects.get(
+            order_reference=order_reference,
+            account__user=request.user
+        )
+        
+        # Query ClickPesa for latest status
+        success, api_data = payout.query_clickpesa_status()
+        
+        # Serialize payout data
+        serializer = PayoutSerializer(payout, context={'request': request})
+        
+        response_data = {
+            "payout": serializer.data,
+            "api_data": api_data if success else None,
+            "updated_from_api": success
+        }
+        
+        return Response(response_data, status=status.HTTP_200_OK)
+        
+    except Payout.DoesNotExist:
+        return Response(
+            {"error": "Payout not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    except Exception as e:
+        logger.error(f"Error checking payout status: {e}")
+        return Response(
+            {"error": "Internal server error"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def payout_history(request):
+    """
+    Get user's payout transaction history
+    """
+    account = get_object_or_404(Account, user=request.user)
+    
+    # Get query parameters
+    page = int(request.GET.get('page', 1))
+    page_size = min(int(request.GET.get('page_size', 20)), 100)
+    status_filter = request.GET.get('status')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    
+    # Base query for payouts
+    payouts = Payout.objects.filter(account=account).order_by('-created_at')
+    
+    # Apply filters
+    if status_filter:
+        payouts = payouts.filter(status=status_filter.upper())
+    
+    if start_date:
+        try:
+            start_date = datetime.fromisoformat(start_date.replace('Z', '+00:00'))
+            payouts = payouts.filter(created_at__gte=start_date)
+        except ValueError:
+            return Response(
+                {"error": "Invalid start_date format. Use ISO format."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
+    if end_date:
+        try:
+            end_date = datetime.fromisoformat(end_date.replace('Z', '+00:00'))
+            payouts = payouts.filter(created_at__lte=end_date)
+        except ValueError:
+            return Response(
+                {"error": "Invalid end_date format. Use ISO format."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
+    # Pagination
+    total_count = payouts.count()
+    start_idx = (page - 1) * page_size
+    end_idx = start_idx + page_size
+    payouts = payouts[start_idx:end_idx]
+    
+    # Serialize data
+    serializer = PayoutSerializer(payouts, many=True, context={'request': request})
+    
+    # Calculate statistics
+    stats = Payout.objects.filter(account=account).aggregate(
+        total_amount=models.Sum('amount'),
+        successful_amount=models.Sum('amount', filter=models.Q(status='SUCCESS')),
+        total_fees=models.Sum('fee'),
+        total_count=models.Count('id'),
+        successful_count=models.Count('id', filter=models.Q(status='SUCCESS'))
+    )
+    
+    return Response({
+        "count": total_count,
+        "page": page,
+        "page_size": page_size,
+        "results": serializer.data,
+        "statistics": {
+            "total_amount": stats['total_amount'] or 0,
+            "successful_amount": stats['successful_amount'] or 0,
+            "total_fees": stats['total_fees'] or 0,
+            "total_transactions": stats['total_count'] or 0,
+            "successful_transactions": stats['successful_count'] or 0,
+            "success_rate": round(
+                (stats['successful_count'] / stats['total_count'] * 100) 
+                if stats['total_count'] > 0 else 0, 2
+            )
+        }
+    }, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def payout_limits(request):
+    """
+    Get payout limits and current usage for the user
+    """
+    account = get_object_or_404(Account, user=request.user)
+    
+    # Calculate current usage
+    today = timezone.now().date()
+    current_month = timezone.now().replace(day=1).date()
+    
+    daily_used = Payout.objects.filter(
+        account=account,
+        status='SUCCESS',
+        created_at__date=today
+    ).aggregate(total=models.Sum('amount'))['total'] or Decimal('0')
+    
+    monthly_used = Payout.objects.filter(
+        account=account,
+        status='SUCCESS',
+        created_at__date__gte=current_month
+    ).aggregate(total=models.Sum('amount'))['total'] or Decimal('0')
+    
+    return Response({
+        "limits": {
+            "daily_limit": account.daily_limit,
+            "monthly_limit": account.monthly_limit,
+            "single_transaction_limit": account.single_transaction_limit,
+            "minimum_amount": 1000,
+            "maximum_amount": 5000000
+        },
+        "usage": {
+            "daily_used": daily_used,
+            "monthly_used": monthly_used,
+            "daily_remaining": max(Decimal('0'), account.daily_limit - daily_used),
+            "monthly_remaining": max(Decimal('0'), account.monthly_limit - monthly_used)
+        },
+        "account_info": {
+            "current_balance": account.account_balance,
+            "kyc_confirmed": account.kyc_confirmed,
+            "account_status": account.account_status
+        },
+        "payout_info": {
+            "supported_operators": ["M-PESA", "TIGO-PESA", "AIRTEL-MONEY"],
+            "currency": "TZS",
+            "processing_time": "5-15 minutes",
+            "fee_bearer": "customer"
+        }
+    }, status=status.HTTP_200_OK)
+
+@csrf_exempt
+@api_view(["POST"])
+def clickpesa_payout_webhook(request):
+    """
+    Enhanced webhook handler for ClickPesa payout notifications
+    """
+    try:
+        data = request.data
+        order_ref = data.get("orderReference")
+        status_code = data.get("status")
+        
+        # Log the webhook data (masked for security)
+        masked_data = mask_sensitive_data(data)
+        logger.info(f"Received ClickPesa payout webhook: {masked_data}")
+        
+        # Validate required fields
+        if not order_ref or not status_code:
+            logger.warning(f"Invalid payout webhook payload: missing orderReference or status")
+            return Response(
+                {"error": "Invalid payload - missing orderReference or status"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Store webhook data first
+        webhook = PayoutWebhook.objects.create(
+            order_reference=order_ref,
+            webhook_data=data
+        )
+        
+        # Process the webhook
+        with db_transaction.atomic():
+            try:
+                # Get payout record
+                payout = Payout.objects.select_for_update().get(order_reference=order_ref)
+                webhook.payout = payout
+                webhook.save()
+                
+                old_status = payout.status
+                user = payout.account.user
+                
+                # Update payout based on status
+                if status_code == "SUCCESS":
+                    # Update payout
+                    payout.status = "SUCCESS"
+                    payout.message = data.get("message", "Payout completed successfully")
+                    payout.clickpesa_updated_at = timezone.now()
+                    
+                    # Update beneficiary info if provided
+                    if "beneficiary" in data:
+                        beneficiary = data["beneficiary"]
+                        if "name" in beneficiary:
+                            payout.beneficiary_name = beneficiary["name"]
+                        if "phoneNumber" in beneficiary:
+                            payout.beneficiary_phone = beneficiary["phoneNumber"]
+                    
+                    payout.save()
+                    
+                    # Update legacy transaction
+                    try:
+                        transaction_record = Transaction.objects.get(reference=order_ref)
+                        transaction_record.status = "completed"
+                        transaction_record.save()
+                    except Transaction.DoesNotExist:
+                        pass
+                    
+                    # Create status history
+                    PayoutStatusHistory.objects.create(
+                        payout=payout,
+                        previous_status=old_status,
+                        new_status="SUCCESS",
+                        message=f"Payout completed via webhook. Amount: {payout.amount} {payout.currency}"
+                    )
+                    
+                    # Send success email
+                    try:
+                        _send_payout_success_email(user, payout)
+                        logger.info(f"Success email sent for payout {order_ref}")
+                    except Exception as email_error:
+                        logger.error(f"Failed to send success email for {order_ref}: {email_error}")
+                    
+                elif status_code in ["FAILED", "REVERSED", "REFUNDED"]:
+                    # Update payout
+                    payout.status = status_code
+                    payout.message = data.get("message", f"Payout {status_code.lower()}")
+                    payout.clickpesa_updated_at = timezone.now()
+                    payout.save()
+                    
+                    # Refund the amount to account balance
+                    payout.account.account_balance += payout.total_amount
+                    payout.account.save()
+                    
+                    # Update legacy transaction
+                    try:
+                        transaction_record = Transaction.objects.get(reference=order_ref)
+                        transaction_record.status = "failed"
+                        transaction_record.save()
+                    except Transaction.DoesNotExist:
+                        pass
+                    
+                    # Create status history
+                    PayoutStatusHistory.objects.create(
+                        payout=payout,
+                        previous_status=old_status,
+                        new_status=status_code,
+                        message=f"Payout {status_code.lower()} via webhook: {data.get('message', 'Unknown error')}"
+                    )
+                    
+                    # Send failure email
+                    try:
+                        _send_payout_failure_email(user, payout)
+                        logger.info(f"Failure email sent for payout {order_ref}")
+                    except Exception as email_error:
+                        logger.error(f"Failed to send failure email for {order_ref}: {email_error}")
+                
+                else:
+                    # Handle other statuses (PROCESSING, PENDING, AUTHORIZED, etc.)
+                    payout.status = status_code
+                    payout.message = data.get("message", f"Payout status: {status_code}")
+                    payout.clickpesa_updated_at = timezone.now()
+                    payout.save()
+                    
+                    # Create status history
+                    PayoutStatusHistory.objects.create(
+                        payout=payout,
+                        previous_status=old_status,
+                        new_status=status_code,
+                        message=f"Status updated via webhook: {data.get('message', '')}"
+                    )
+                
+                # Mark webhook as processed
+                webhook.processed = True
+                webhook.save()
+                
+                logger.info(f"Payout webhook processed successfully for {order_ref}: {old_status} -> {payout.status}")
+                
+            except Payout.DoesNotExist:
+                logger.warning(f"Payout webhook received for unknown payout: {order_ref}")
+                return Response(
+                    {"error": "Payout not found", "order_reference": order_ref},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+        
+        return Response(
+            {"message": "Payout webhook processed successfully", "order_reference": order_ref},
+            status=status.HTTP_200_OK
+        )
+        
+    except Exception as e:
+        logger.error(f"Error processing payout webhook: {e}")
+        return Response(
+            {"error": "Internal server error"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+def _send_payout_success_email(user, payout):
+    """Send success email for completed payout"""
+    try:
+        subject = "BluPay Payout Successful"
+        html_content = render_to_string("emails/payout_success.html", {
+            "user": user,
+            "amount": payout.amount,
+            "fee": payout.fee,
+            "total_amount": payout.total_amount,
+            "currency": payout.currency,
+            "order_reference": payout.order_reference,
+            "beneficiary_name": payout.beneficiary_name,
+            "beneficiary_phone": payout.beneficiary_phone,
+            "channel_provider": payout.channel_provider,
+            "new_balance": payout.account.account_balance,
+            "date": timezone.now().strftime("%Y-%m-%d %H:%M"),
+        })
+        
+        email = EmailMultiAlternatives(
+            subject=subject,
+            body="Your payout was successful.",
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[user.email],
+        )
+        email.attach_alternative(html_content, "text/html")
+        email.send(fail_silently=True)
+        
+    except Exception as e:
+        logger.error(f"Failed to send payout success email: {e}")
+
+def _send_payout_failure_email(user, payout):
+    """Send failure email for failed payout"""
+    try:
+        subject = "BluPay Payout Failed"
+        html_content = render_to_string("emails/payout_failed.html", {
+            "user": user,
+            "amount": payout.amount,
+            "currency": payout.currency,
+            "order_reference": payout.order_reference,
+            "beneficiary_phone": payout.beneficiary_phone,
+            "reason": payout.message or "Payout processing failed",
+            "date": timezone.now().strftime("%Y-%m-%d %H:%M"),
+        })
+        
+        email = EmailMultiAlternatives(
+            subject=subject,
+            body="Your payout attempt failed.",
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[user.email],
+        )
+        email.attach_alternative(html_content, "text/html")
+        email.send(fail_silently=True)
+        
+    except Exception as e:
+        logger.error(f"Failed to send payout failure email: {e}")
+
+

@@ -4,6 +4,7 @@ from django.db.models import Q
 from decimal import Decimal
 from Accounts.models import *
 
+import re
 from bluepay.models import (
     Transaction, 
     Notification ,
@@ -11,6 +12,16 @@ from bluepay.models import (
     PaymentTransaction,
     NFCDevice,
     PaymentToken,
+    Payment, 
+    PaymentStatusHistory, 
+    MobileMoneyProvider,
+    Payout,
+    PayoutStatusHistory,
+    PayoutWebhook,
+    
+
+
+
 )
 
 class TransactionSerializer(serializers.ModelSerializer):
@@ -232,3 +243,222 @@ class ConfirmTransferSerializer(serializers.Serializer):
         )
 
         return tx
+    
+
+
+
+
+
+class MobileMoneyProviderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MobileMoneyProvider
+        fields = ['id', 'name', 'code', 'country', 'is_active']
+
+
+class PaymentStatusHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PaymentStatusHistory
+        fields = ['id', 'previous_status', 'new_status', 'message', 'created_at']
+
+class PaymentSerializer(serializers.ModelSerializer):
+    status_history = PaymentStatusHistorySerializer(many=True, read_only=True)
+    mobile_provider_name = serializers.CharField(source='mobile_provider.name', read_only=True)
+    account_number = serializers.CharField(source='account.account_number', read_only=True)
+    user_email = serializers.CharField(source='account.user.email', read_only=True)
+    
+    class Meta:
+        model = Payment
+        fields = [
+            'id', 'payment_reference', 'order_reference', 'clickpesa_transaction_id',
+            'account', 'account_number', 'user_email', 'transaction_type', 'payment_method',
+            'mobile_provider', 'mobile_provider_name', 'amount', 'currency',
+            'collected_amount', 'collected_currency', 'status', 'message',
+            'customer_name', 'customer_phone', 'customer_email', 'client_id',
+            'metadata', 'created_at', 'updated_at', 'clickpesa_created_at',
+            'clickpesa_updated_at', 'status_history'
+        ]
+        read_only_fields = [
+            'id', 'clickpesa_transaction_id', 'collected_amount', 'collected_currency',
+            'status', 'message', 'client_id', 'created_at', 'updated_at',
+            'clickpesa_created_at', 'clickpesa_updated_at'
+        ]
+
+class PaymentStatusQuerySerializer(serializers.Serializer):
+    """Serializer for payment status query response"""
+    id = serializers.CharField()
+    status = serializers.ChoiceField(choices=['SUCCESS', 'SETTLED', 'PROCESSING', 'PENDING', 'FAILED'])
+    payment_reference = serializers.CharField(source='paymentReference')
+    order_reference = serializers.CharField(source='orderReference')
+    collected_amount = serializers.IntegerField(source='collectedAmount')
+    collected_currency = serializers.CharField(source='collectedCurrency')
+    message = serializers.CharField()
+    updated_at = serializers.DateTimeField(source='updatedAt')
+    created_at = serializers.DateTimeField(source='createdAt')
+    customer_name = serializers.CharField(source='customer.customerName')
+    customer_phone = serializers.CharField(source='customer.customerPhoneNumber')
+    customer_email = serializers.EmailField(source='customer.customerEmail', allow_blank=True)
+    client_id = serializers.CharField(source='clientId')
+
+class InitiateMobileMoneyPaymentSerializer(serializers.Serializer):
+    """Serializer for initiating mobile money payments"""
+    amount = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=0.01)
+    currency = serializers.CharField(max_length=10, default='TZS')
+    customer_name = serializers.CharField(max_length=200)
+    customer_phone = serializers.CharField(max_length=20)
+    customer_email = serializers.EmailField(required=False, allow_blank=True)
+    mobile_provider = serializers.CharField(max_length=50)
+    description = serializers.CharField(max_length=500, required=False, allow_blank=True)
+    callback_url = serializers.URLField(required=False, allow_blank=True)
+    
+    def validate_customer_phone(self, value):
+        """Validate phone number format"""
+        if not re.match(r'^\+?[0-9]{9,15}$', value):
+            raise serializers.ValidationError("Invalid phone number format")
+        return value
+
+class PaymentSummarySerializer(serializers.Serializer):
+    """Serializer for payment summary statistics"""
+    total_payments = serializers.IntegerField()
+    successful_payments = serializers.IntegerField()
+    pending_payments = serializers.IntegerField()
+    failed_payments = serializers.IntegerField()
+    total_amount = serializers.DecimalField(max_digits=15, decimal_places=2)
+    successful_amount = serializers.DecimalField(max_digits=15, decimal_places=2)
+    success_rate = serializers.FloatField()
+    
+class BulkPaymentStatusSerializer(serializers.Serializer):
+    """Serializer for bulk payment status queries"""
+    order_references = serializers.ListField(
+        child=serializers.CharField(max_length=100),
+        min_length=1,
+        max_length=50  # Limit bulk queries
+    )
+
+class TopupRequestSerializer(serializers.Serializer):
+    """Serializer for topup requests"""
+    amount = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=1000)  # Minimum 1000 TZS
+    phone = serializers.CharField(max_length=20)
+    
+    def validate_phone(self, value):
+        """Validate phone number format for Tanzania"""
+        # Remove any spaces or special characters
+        phone = re.sub(r'[^\d+]', '', value)
+        
+        # Check if it's a valid Tanzanian number
+        if not re.match(r'^\+?255[67]\d{8}$', phone) and not re.match(r'^0[67]\d{8}$', phone):
+            raise serializers.ValidationError(
+                "Invalid phone number. Please use format: +255XXXXXXXXX or 0XXXXXXXXX"
+            )
+        
+        # Normalize to international format
+        if phone.startswith('0'):
+            phone = '+255' + phone[1:]
+        elif not phone.startswith('+'):
+            phone = '+' + phone
+            
+        return phone
+    
+    def validate_amount(self, value):
+        """Validate topup amount"""
+        if value < 1000:
+            raise serializers.ValidationError("Minimum topup amount is 1,000 TZS")
+        if value > 1000000:  # 1M TZS max
+            raise serializers.ValidationError("Maximum topup amount is 1,000,000 TZS")
+        return value
+
+
+
+class TopupResponseSerializer(serializers.Serializer):
+    """Serializer for topup response"""
+    message = serializers.CharField()
+    order_reference = serializers.CharField()
+    amount = serializers.DecimalField(max_digits=12, decimal_places=2)
+    phone = serializers.CharField()
+    status = serializers.CharField()
+    preview_data = serializers.DictField(required=False)
+
+
+
+
+
+class PayoutStatusHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PayoutStatusHistory
+        fields = ['id', 'previous_status', 'new_status', 'message', 'created_at']
+
+class PayoutSerializer(serializers.ModelSerializer):
+    status_history = PayoutStatusHistorySerializer(many=True, read_only=True)
+    account_number = serializers.CharField(source='account.account_number', read_only=True)
+    user_email = serializers.CharField(source='account.user.email', read_only=True)
+    
+    class Meta:
+        model = Payout
+        fields = [
+            'id', 'payout_reference', 'order_reference', 'clickpesa_payout_id',
+            'account', 'account_number', 'user_email', 'payout_type', 'channel',
+            'channel_provider', 'amount', 'currency', 'fee', 'total_amount',
+            'status', 'message', 'notes', 'beneficiary_name', 'beneficiary_phone',
+            'beneficiary_email', 'client_id', 'metadata', 'preview_data',
+            'payout_fee_bearer', 'created_at', 'updated_at', 'clickpesa_created_at',
+            'clickpesa_updated_at', 'status_history'
+        ]
+        read_only_fields = [
+            'id', 'clickpesa_payout_id', 'fee', 'total_amount', 'status', 'message',
+            'notes', 'client_id', 'created_at', 'updated_at', 'clickpesa_created_at',
+            'clickpesa_updated_at', 'channel_provider', 'payout_fee_bearer'
+        ]
+
+class PayoutRequestSerializer(serializers.Serializer):
+    """Serializer for payout requests"""
+    amount = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=1000)  # Minimum 1000 TZS
+    phone = serializers.CharField(max_length=20)
+    beneficiary_name = serializers.CharField(max_length=200, required=False)
+    
+    def validate_phone(self, value):
+        """Validate phone number format for Tanzania"""
+        # Remove any spaces or special characters
+        phone = re.sub(r'[^\d+]', '', value)
+        
+        # Check if it's a valid Tanzanian number
+        if not re.match(r'^\+?255[67]\d{8}$', phone) and not re.match(r'^0[67]\d{8}$', phone):
+            raise serializers.ValidationError(
+                "Invalid phone number. Please use format: +255XXXXXXXXX or 0XXXXXXXXX"
+            )
+        
+        # Normalize to international format
+        if phone.startswith('0'):
+            phone = '+255' + phone[1:]
+        elif not phone.startswith('+'):
+            phone = '+' + phone
+            
+        return phone
+    
+    def validate_amount(self, value):
+        """Validate payout amount"""
+        if value < 1000:
+            raise serializers.ValidationError("Minimum payout amount is 1,000 TZS")
+        if value > 5000000:  # 5M TZS max
+            raise serializers.ValidationError("Maximum payout amount is 5,000,000 TZS")
+        return value
+
+class PayoutPreviewSerializer(serializers.Serializer):
+    """Serializer for payout preview response"""
+    amount = serializers.DecimalField(max_digits=12, decimal_places=2)
+    balance = serializers.DecimalField(max_digits=12, decimal_places=2)
+    channel_provider = serializers.CharField(source='channelProvider')
+    fee = serializers.DecimalField(max_digits=12, decimal_places=2)
+    payout_fee_bearer = serializers.CharField(source='payoutFeeBearer')
+    order_reference = serializers.CharField(source='order.orderReference')
+    receiver_name = serializers.CharField(source='receiver.name')
+    receiver_phone = serializers.CharField(source='receiver.phoneNumber')
+
+class PayoutSummarySerializer(serializers.Serializer):
+    """Serializer for payout summary statistics"""
+    total_payouts = serializers.IntegerField()
+    successful_payouts = serializers.IntegerField()
+    pending_payouts = serializers.IntegerField()
+    failed_payouts = serializers.IntegerField()
+    total_amount = serializers.DecimalField(max_digits=15, decimal_places=2)
+    successful_amount = serializers.DecimalField(max_digits=15, decimal_places=2)
+    total_fees = serializers.DecimalField(max_digits=15, decimal_places=2)
+    success_rate = serializers.FloatField()

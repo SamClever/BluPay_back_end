@@ -239,3 +239,4 @@ AWS_REGION = "us-east-1"
 
 CLICKPESA_CLIENT_ID = "IDlUeSuskCXqxxYcEpJZwgAj41OoBkzl"
 CLICKPESA_API_KEY = "SKJw0H7f39qvBZRdR3mGoLT2Sw0NuOEL9s2Mxwhdfe"
+CLICKPESA_BASE_URL = 'https://api.clickpesa.com/third-parties'

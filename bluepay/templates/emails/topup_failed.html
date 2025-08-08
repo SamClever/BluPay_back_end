@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Top-Up Failed</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #dc3545; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
+        .content { padding: 20px; background-color: #f8f9fa; }
+        .error-box { background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; border-radius: 5px; margin: 15px 0; }
+        .amount { font-size: 24px; font-weight: bold; color: #dc3545; text-align: center; margin: 20px 0; }
+        .details { background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0; }
+        .footer { text-align: center; padding: 20px; color: #666; }
+        .button { display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>❌ Top-Up Failed</h1>
+        </div>
+        
+        <div class="content">
+            <div class="error-box">
+                <p><strong>We're sorry!</strong> Your top-up attempt was unsuccessful.</p>
+            </div>
+            
+            <div class="amount">
+                {{ amount|floatformat:0 }} {{ currency|default:"TZS" }}
+            </div>
+            
+            <div class="details">
+                <h3>Transaction Details:</h3>
+                <p><strong>Order Reference:</strong> {{ order_reference }}</p>
+                <p><strong>Date & Time:</strong> {{ date }}</p>
+                <p><strong>Reason:</strong> {{ reason }}</p>
+            </div>
+            
+            <p>Dear {{ user.get_full_name|default:user.email }},</p>
+            
+            <p>Unfortunately, your recent top-up attempt was not successful. This could be due to various reasons such as:</p>
+            
+            <ul>
+                <li>Insufficient funds in your mobile money account</li>
+                <li>Network connectivity issues</li>
+                <li>Transaction timeout</li>
+                <li>Mobile money service temporarily unavailable</li>
+            </ul>
+            
+            <p><strong>What you can do:</strong></p>
+            <ul>
+                <li>Check your mobile money account balance</li>
+                <li>Ensure you have good network connectivity</li>
+                <li>Try the transaction again after a few minutes</li>
+                <li>Contact our support team if the problem persists</li>
+            </ul>
+            
+            <div style="text-align: center;">
+                <a href="#" class="button">Try Again</a>
+                <a href="#" class="button">Contact Support</a>
+            </div>
+            
+            <p>We apologize for any inconvenience caused. Our team is here to help if you need assistance.</p>
+            
+            <p>Best regards,<br>The BluPay Team</p>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2024 BluPay. All rights reserved.</p>
+            <p>This is an automated message. Please do not reply to this email.</p>
+        </div>
+    </div>
+</body>
+</html>

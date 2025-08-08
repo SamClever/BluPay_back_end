@@ -6,6 +6,10 @@ from .models import (
     PaymentTransaction,
     NFCDevice,
     PaymentToken,
+    MobileMoneyProvider, 
+    Payment, 
+    PaymentStatusHistory, 
+    PaymentWebhook
 )
 
 @admin.register(Transaction)
@@ -17,7 +21,7 @@ class TransactionAdmin(admin.ModelAdmin):
     ordering = ('-date',)
     fieldsets = (
         ('General Information', {
-            'fields': ('transaction_id', 'user', 'amount', 'description', 'status', 'transaction_type')
+            'fields': ('transaction_id', 'user', 'amount', 'description', 'status', 'transaction_type', 'payment')
         }),
         ('Sender/Receiver Details', {
             'fields': ('sender', 'reciver', 'sender_account', 'reciver_account')
@@ -115,3 +119,44 @@ class NotificationAdmin(admin.ModelAdmin):
             'fields': ('date',)
         }),
     )
+
+
+
+
+
+@admin.register(MobileMoneyProvider)
+class MobileMoneyProviderAdmin(admin.ModelAdmin):
+    list_display = ('name', 'code', 'country', 'is_active', 'created_at')
+    list_filter = ('is_active', 'country')
+    search_fields = ('name', 'code', 'country')
+
+
+@admin.register(Payment)
+class PaymentAdmin(admin.ModelAdmin):
+    list_display = (
+        'order_reference', 'payment_reference', 'account', 'amount', 'currency',
+        'status', 'payment_method', 'mobile_provider', 'created_at', 'updated_at'
+    )
+    list_filter = ('status', 'payment_method', 'currency', 'created_at')
+    search_fields = ('order_reference', 'payment_reference', 'customer_name', 'customer_phone')
+    autocomplete_fields = ('account', 'mobile_provider')
+    readonly_fields = ('created_at', 'updated_at', 'clickpesa_created_at', 'clickpesa_updated_at')
+    ordering = ('-created_at',)
+
+
+@admin.register(PaymentStatusHistory)
+class PaymentStatusHistoryAdmin(admin.ModelAdmin):
+    list_display = ('payment', 'previous_status', 'new_status', 'created_at')
+    list_filter = ('previous_status', 'new_status')
+    search_fields = ('payment__order_reference',)
+    autocomplete_fields = ('payment',)
+    ordering = ('-created_at',)
+
+
+@admin.register(PaymentWebhook)
+class PaymentWebhookAdmin(admin.ModelAdmin):
+    list_display = ('order_reference', 'payment', 'processed', 'created_at')
+    list_filter = ('processed',)
+    search_fields = ('order_reference', 'payment__order_reference')
+    autocomplete_fields = ('payment',)
+    ordering = ('-created_at',)

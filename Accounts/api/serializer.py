@@ -58,7 +58,17 @@ class KYCStep1Serializer(serializers.Serializer):
         Called by serializer.save() when no instance is provided.
         """
         user = self.context['request'].user
-        kyc, _ = KYC.objects.get_or_create(user=user)
+        account = Account.objects.get(user=user)
+
+        kyc, _ = KYC.objects.get_or_create(
+            user=user,
+            account=account,
+            **validated_data
+        )
+        # Check if user already started KYC
+        # if KYC.objects.filter(user=user).exists():
+        #     raise serializers.ValidationError("You have already started KYC.")
+        
         kyc.identity_type = validated_data['identity_type']
         kyc.country       = validated_data['country']
         kyc.save()
@@ -72,6 +82,9 @@ class KYCStep1Serializer(serializers.Serializer):
         instance.country       = validated_data.get('country',       instance.country)
         instance.save()
         return instance
+    
+
+        
 
      
 
