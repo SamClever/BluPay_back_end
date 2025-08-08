@@ -3612,3 +3612,18 @@ Not Found: /wordpress/wp-admin/setup-config.php
 Not Found: /media/default.jpg
 Not Found: /media/default.jpg
 Not Found: /media/default.jpg
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+Unauthorized: /webhooks/clickpesa/
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")

@@ -9,7 +9,10 @@ from .models import (
     MobileMoneyProvider, 
     Payment, 
     PaymentStatusHistory, 
-    PaymentWebhook
+    PaymentWebhook,
+    Payout, 
+    PayoutStatusHistory, 
+    PayoutWebhook
 )
 
 @admin.register(Transaction)
@@ -160,3 +163,82 @@ class PaymentWebhookAdmin(admin.ModelAdmin):
     search_fields = ('order_reference', 'payment__order_reference')
     autocomplete_fields = ('payment',)
     ordering = ('-created_at',)
+    
+    
+    
+    
+    
+@admin.register(Payout)
+class PayoutAdmin(admin.ModelAdmin):
+    list_display = (
+        "order_reference",
+        "payout_reference",
+        "account",
+        "amount",
+        "currency",
+        "status",
+        "channel",
+        "channel_provider",
+        "beneficiary_name",
+        "created_at",
+        "clickpesa_updated_at",
+    )
+    list_filter = (
+        "status",
+        "channel",
+        "currency",
+        "created_at",
+        "clickpesa_updated_at",
+    )
+    search_fields = (
+        "order_reference",
+        "payout_reference",
+        "beneficiary_name",
+        "beneficiary_phone",
+        "account__user__username",
+        "account__user__email",
+    )
+    readonly_fields = (
+        "id",
+        "created_at",
+        "updated_at",
+        "clickpesa_created_at",
+        "clickpesa_updated_at",
+        "preview_data",
+        "metadata",
+    )
+    ordering = ("-created_at",)
+    date_hierarchy = "created_at"
+
+
+@admin.register(PayoutStatusHistory)
+class PayoutStatusHistoryAdmin(admin.ModelAdmin):
+    list_display = (
+        "payout",
+        "previous_status",
+        "new_status",
+        "message",
+        "created_at",
+    )
+    list_filter = ("previous_status", "new_status", "created_at")
+    search_fields = (
+        "payout__order_reference",
+        "previous_status",
+        "new_status",
+        "message",
+    )
+    readonly_fields = ("id", "created_at")
+
+
+@admin.register(PayoutWebhook)
+class PayoutWebhookAdmin(admin.ModelAdmin):
+    list_display = (
+        "order_reference",
+        "payout",
+        "processed",
+        "created_at",
+    )
+    list_filter = ("processed", "created_at")
+    search_fields = ("order_reference", "payout__order_reference")
+    readonly_fields = ("id", "created_at", "webhook_data")
+    ordering = ("-created_at",)
