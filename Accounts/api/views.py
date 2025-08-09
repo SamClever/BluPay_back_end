@@ -22,7 +22,9 @@ import uuid
 from django.conf import settings
 from decimal import Decimal
 from bluepay.models import *
+from bluepay.api.serializers import *
 
+from bluepay.api.utils import *
 import logging
 logger = logging.getLogger(__name__)
 from bluepay.models import  Payment, PaymentStatusHistory, MobileMoneyProvider, Transaction
@@ -627,7 +629,7 @@ def dashboard(request):
     # Get recent transactions
     recent_transactions = Transaction.objects.filter(
         reciver_account=account
-    ).order_by('-created_at')[:5]
+    ).order_by('-date')[:5]
 
     # Get recent payments
     recent_payments = Payment.objects.filter(
@@ -639,7 +641,7 @@ def dashboard(request):
     daily_usage = Transaction.objects.filter(
         reciver_account=account,
         status='completed',
-        created_at__date=today
+        date__date=today
     ).aggregate(
         total=models.Sum('amount')
     )['total'] or Decimal('0')
@@ -649,7 +651,7 @@ def dashboard(request):
     monthly_usage = Transaction.objects.filter(
         reciver_account=account,
         status='completed',
-        created_at__date__gte=current_month
+        date__date__gte=current_month
     ).aggregate(
         total=models.Sum('amount')
     )['total'] or Decimal('0')

@@ -3627,3 +3627,782 @@ Unauthorized: /webhooks/clickpesa/
   warnings.warn("min_value should be a Decimal instance.")
 /home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
   warnings.warn("min_value should be a Decimal instance.")
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+Not Found: /wp-admin/setup-config.php
+Not Found: /wordpress/wp-admin/setup-config.php
+Not Found: /wp-admin/setup-config.php
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+Not Found: /robots.txt
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+Not Found: /robots.txt
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+Not Found: /wp-admin/setup-config.php
+Not Found: /wordpress/wp-admin/setup-config.php
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+Not Found: /wp-admin/setup-config.php
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+Not Found: /robots.txt
+Not Found: /sitemap.xml
+Not Found: /robots.txt
+Not Found: /sitemap.xml
+Not Found: /config.json
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+Not Found: /robots.txt
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+Bad Request: /userAuth/register/
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+Internal Server Error: /Account/dashboard/
+Traceback (most recent call last):
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/BluPay_back_end/Accounts/api/views.py", line 630, in dashboard
+    ).order_by('-created_at')[:5]
+      ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/query.py", line 1701, in order_by
+    obj.query.add_ordering(*field_names)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/sql/query.py", line 2249, in add_ordering
+    self.names_to_path(item.split(LOOKUP_SEP), self.model._meta)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1768, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'created_at' into field. Choices are: amount, date, description, id, payment, payment_id, reciver, reciver_account, reciver_account_id, reciver_id, reference, sender, sender_account, sender_account_id, sender_id, status, transaction_id, transaction_type, update, user, user_id
+Internal Server Error: /Account/dashboard/
+Traceback (most recent call last):
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/BluPay_back_end/Accounts/api/views.py", line 630, in dashboard
+    ).order_by('-created_at')[:5]
+      ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/query.py", line 1701, in order_by
+    obj.query.add_ordering(*field_names)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/sql/query.py", line 2249, in add_ordering
+    self.names_to_path(item.split(LOOKUP_SEP), self.model._meta)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1768, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'created_at' into field. Choices are: amount, date, description, id, payment, payment_id, reciver, reciver_account, reciver_account_id, reciver_id, reference, sender, sender_account, sender_account_id, sender_id, status, transaction_id, transaction_type, update, user, user_id
+Internal Server Error: /Account/dashboard/
+Traceback (most recent call last):
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/BluPay_back_end/Accounts/api/views.py", line 630, in dashboard
+    ).order_by('-created_at')[:5]
+      ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/query.py", line 1701, in order_by
+    obj.query.add_ordering(*field_names)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/sql/query.py", line 2249, in add_ordering
+    self.names_to_path(item.split(LOOKUP_SEP), self.model._meta)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1768, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'created_at' into field. Choices are: amount, date, description, id, payment, payment_id, reciver, reciver_account, reciver_account_id, reciver_id, reference, sender, sender_account, sender_account_id, sender_id, status, transaction_id, transaction_type, update, user, user_id
+Internal Server Error: /Account/dashboard/
+Traceback (most recent call last):
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/BluPay_back_end/Accounts/api/views.py", line 630, in dashboard
+    ).order_by('-created_at')[:5]
+      ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/query.py", line 1701, in order_by
+    obj.query.add_ordering(*field_names)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/sql/query.py", line 2249, in add_ordering
+    self.names_to_path(item.split(LOOKUP_SEP), self.model._meta)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1768, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'created_at' into field. Choices are: amount, date, description, id, payment, payment_id, reciver, reciver_account, reciver_account_id, reciver_id, reference, sender, sender_account, sender_account_id, sender_id, status, transaction_id, transaction_type, update, user, user_id
+[AWS Error] An error occurred (InvalidParameterException) when calling the CompareFaces operation: Request has invalid parameters
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+Not Found: /robots.txt
+Internal Server Error: /Account/dashboard/
+Traceback (most recent call last):
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/BluPay_back_end/Accounts/api/views.py", line 630, in dashboard
+    ).order_by('-created_at')[:5]
+      ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/query.py", line 1701, in order_by
+    obj.query.add_ordering(*field_names)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/sql/query.py", line 2249, in add_ordering
+    self.names_to_path(item.split(LOOKUP_SEP), self.model._meta)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1768, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'created_at' into field. Choices are: amount, date, description, id, payment, payment_id, reciver, reciver_account, reciver_account_id, reciver_id, reference, sender, sender_account, sender_account_id, sender_id, status, transaction_id, transaction_type, update, user, user_id
+Internal Server Error: /Account/dashboard/
+Traceback (most recent call last):
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/BluPay_back_end/Accounts/api/views.py", line 630, in dashboard
+    ).order_by('-created_at')[:5]
+      ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/query.py", line 1701, in order_by
+    obj.query.add_ordering(*field_names)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/sql/query.py", line 2249, in add_ordering
+    self.names_to_path(item.split(LOOKUP_SEP), self.model._meta)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1768, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'created_at' into field. Choices are: amount, date, description, id, payment, payment_id, reciver, reciver_account, reciver_account_id, reciver_id, reference, sender, sender_account, sender_account_id, sender_id, status, transaction_id, transaction_type, update, user, user_id
+Internal Server Error: /Account/dashboard/
+Traceback (most recent call last):
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/BluPay_back_end/Accounts/api/views.py", line 630, in dashboard
+    ).order_by('-created_at')[:5]
+      ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/query.py", line 1701, in order_by
+    obj.query.add_ordering(*field_names)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/sql/query.py", line 2249, in add_ordering
+    self.names_to_path(item.split(LOOKUP_SEP), self.model._meta)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1768, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'created_at' into field. Choices are: amount, date, description, id, payment, payment_id, reciver, reciver_account, reciver_account_id, reciver_id, reference, sender, sender_account, sender_account_id, sender_id, status, transaction_id, transaction_type, update, user, user_id
+Unauthorized: /userAuth/login/
+Unauthorized: /userAuth/login/
+Internal Server Error: /Account/dashboard/
+Traceback (most recent call last):
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/BluPay_back_end/Accounts/api/views.py", line 630, in dashboard
+    ).order_by('-created_at')[:5]
+      ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/query.py", line 1701, in order_by
+    obj.query.add_ordering(*field_names)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/sql/query.py", line 2249, in add_ordering
+    self.names_to_path(item.split(LOOKUP_SEP), self.model._meta)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1768, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'created_at' into field. Choices are: amount, date, description, id, payment, payment_id, reciver, reciver_account, reciver_account_id, reciver_id, reference, sender, sender_account, sender_account_id, sender_id, status, transaction_id, transaction_type, update, user, user_id
+Internal Server Error: /Account/dashboard/
+Traceback (most recent call last):
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/BluPay_back_end/Accounts/api/views.py", line 630, in dashboard
+    ).order_by('-created_at')[:5]
+      ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/query.py", line 1701, in order_by
+    obj.query.add_ordering(*field_names)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/sql/query.py", line 2249, in add_ordering
+    self.names_to_path(item.split(LOOKUP_SEP), self.model._meta)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1768, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'created_at' into field. Choices are: amount, date, description, id, payment, payment_id, reciver, reciver_account, reciver_account_id, reciver_id, reference, sender, sender_account, sender_account_id, sender_id, status, transaction_id, transaction_type, update, user, user_id
+Unauthorized: /Account/kyc/step5/
+Internal Server Error: /Account/dashboard/
+Traceback (most recent call last):
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/BluPay_back_end/Accounts/api/views.py", line 630, in dashboard
+    ).order_by('-created_at')[:5]
+      ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/query.py", line 1701, in order_by
+    obj.query.add_ordering(*field_names)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/sql/query.py", line 2249, in add_ordering
+    self.names_to_path(item.split(LOOKUP_SEP), self.model._meta)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1768, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'created_at' into field. Choices are: amount, date, description, id, payment, payment_id, reciver, reciver_account, reciver_account_id, reciver_id, reference, sender, sender_account, sender_account_id, sender_id, status, transaction_id, transaction_type, update, user, user_id
+Method Not Allowed: /Account/dashboard/
+Internal Server Error: /Account/dashboard/
+Traceback (most recent call last):
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/BluPay_back_end/Accounts/api/views.py", line 630, in dashboard
+    ).order_by('-created_at')[:5]
+      ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/query.py", line 1701, in order_by
+    obj.query.add_ordering(*field_names)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/sql/query.py", line 2249, in add_ordering
+    self.names_to_path(item.split(LOOKUP_SEP), self.model._meta)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1768, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'created_at' into field. Choices are: amount, date, description, id, payment, payment_id, reciver, reciver_account, reciver_account_id, reciver_id, reference, sender, sender_account, sender_account_id, sender_id, status, transaction_id, transaction_type, update, user, user_id
+Internal Server Error: /Account/dashboard/
+Traceback (most recent call last):
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/BluPay_back_end/Accounts/api/views.py", line 630, in dashboard
+    ).order_by('-created_at')[:5]
+      ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/query.py", line 1701, in order_by
+    obj.query.add_ordering(*field_names)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/sql/query.py", line 2249, in add_ordering
+    self.names_to_path(item.split(LOOKUP_SEP), self.model._meta)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1768, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'created_at' into field. Choices are: amount, date, description, id, payment, payment_id, reciver, reciver_account, reciver_account_id, reciver_id, reference, sender, sender_account, sender_account_id, sender_id, status, transaction_id, transaction_type, update, user, user_id
+Unauthorized: /accounts/search/
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+Internal Server Error: /Account/dashboard/
+Traceback (most recent call last):
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/BluPay_back_end/Accounts/api/views.py", line 630, in dashboard
+    ).order_by('-created_at')[:5]
+      ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/query.py", line 1701, in order_by
+    obj.query.add_ordering(*field_names)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/sql/query.py", line 2249, in add_ordering
+    self.names_to_path(item.split(LOOKUP_SEP), self.model._meta)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1768, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'created_at' into field. Choices are: amount, date, description, id, payment, payment_id, reciver, reciver_account, reciver_account_id, reciver_id, reference, sender, sender_account, sender_account_id, sender_id, status, transaction_id, transaction_type, update, user, user_id
+Internal Server Error: /Account/dashboard/
+Traceback (most recent call last):
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/BluPay_back_end/Accounts/api/views.py", line 630, in dashboard
+    ).order_by('-created_at')[:5]
+      ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/query.py", line 1701, in order_by
+    obj.query.add_ordering(*field_names)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/sql/query.py", line 2249, in add_ordering
+    self.names_to_path(item.split(LOOKUP_SEP), self.model._meta)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1768, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'created_at' into field. Choices are: amount, date, description, id, payment, payment_id, reciver, reciver_account, reciver_account_id, reciver_id, reference, sender, sender_account, sender_account_id, sender_id, status, transaction_id, transaction_type, update, user, user_id
+Internal Server Error: /Account/dashboard/
+Traceback (most recent call last):
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/BluPay_back_end/Accounts/api/views.py", line 630, in dashboard
+    ).order_by('-created_at')[:5]
+      ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/query.py", line 1701, in order_by
+    obj.query.add_ordering(*field_names)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/sql/query.py", line 2249, in add_ordering
+    self.names_to_path(item.split(LOOKUP_SEP), self.model._meta)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1768, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'created_at' into field. Choices are: amount, date, description, id, payment, payment_id, reciver, reciver_account, reciver_account_id, reciver_id, reference, sender, sender_account, sender_account_id, sender_id, status, transaction_id, transaction_type, update, user, user_id
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+Not Found: /wordpress/wp-admin/setup-config.php
+Not Found: /wp-admin/setup-config.php
+Not Found: /wordpress/wp-admin/setup-config.php
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+Unauthorized: /Account/dashboard/
+Internal Server Error: /Account/dashboard/
+Traceback (most recent call last):
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/BluPay_back_end/Accounts/api/views.py", line 630, in dashboard
+    ).order_by('-created_at')[:5]
+      ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/query.py", line 1701, in order_by
+    obj.query.add_ordering(*field_names)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/sql/query.py", line 2249, in add_ordering
+    self.names_to_path(item.split(LOOKUP_SEP), self.model._meta)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1768, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'created_at' into field. Choices are: amount, date, description, id, payment, payment_id, reciver, reciver_account, reciver_account_id, reciver_id, reference, sender, sender_account, sender_account_id, sender_id, status, transaction_id, transaction_type, update, user, user_id
+Bad Request: /userAuth/verify-login-otp/
+Internal Server Error: /Account/dashboard/
+Traceback (most recent call last):
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/BluPay_back_end/Accounts/api/views.py", line 630, in dashboard
+    ).order_by('-created_at')[:5]
+      ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/query.py", line 1701, in order_by
+    obj.query.add_ordering(*field_names)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/sql/query.py", line 2249, in add_ordering
+    self.names_to_path(item.split(LOOKUP_SEP), self.model._meta)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/db/models/sql/query.py", line 1768, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'created_at' into field. Choices are: amount, date, description, id, payment, payment_id, reciver, reciver_account, reciver_account_id, reciver_id, reference, sender, sender_account, sender_account_id, sender_id, status, transaction_id, transaction_type, update, user, user_id
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+Internal Server Error: /Account/dashboard/
+Traceback (most recent call last):
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/BluPay_back_end/Accounts/api/views.py", line 679, in dashboard
+    "recent_transactions": TransactionSerializer(recent_transactions, many=True).data,
+                           ^^^^^^^^^^^^^^^^^^^^^
+NameError: name 'TransactionSerializer' is not defined
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+Internal Server Error: /Account/dashboard/
+Traceback (most recent call last):
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/thebkihw/BluPay_back_end/Accounts/api/views.py", line 690, in dashboard
+    masked_data = mask_sensitive_data(data)
+                  ^^^^^^^^^^^^^^^^^^^
+NameError: name 'mask_sensitive_data' is not defined
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
+Not Found: /media/default.jpg
+/home/thebkihw/virtualenv/BluPay_back_end/3.11/lib/python3.11/site-packages/rest_framework/fields.py:992: UserWarning: min_value should be a Decimal instance.
+  warnings.warn("min_value should be a Decimal instance.")
