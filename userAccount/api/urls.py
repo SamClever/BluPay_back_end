@@ -12,6 +12,7 @@ from .views import (
     forgot_password,
     verify_forgot_password_otp,
     reset_password,
+    change_password,
     google_login,
     logout_user,
 )
@@ -39,6 +40,7 @@ urlpatterns = [
         name="verify_forgot_password_otp",
     ),
     path("reset-password/", reset_password, name="reset_password"),
+    path("change-password/", change_password, name="change_password"),
     # GOOGLE LOGIN
     path("token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),

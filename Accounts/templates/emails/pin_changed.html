@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PIN Changed Successfully - BluPay</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #007bff;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+        .title {
+            color: #28a745;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .content {
+            margin-bottom: 30px;
+        }
+        .info-box {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #28a745;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 5px 0;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #495057;
+        }
+        .info-value {
+            color: #007bff;
+            font-weight: 500;
+        }
+        .security-notice {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .security-notice h4 {
+            color: #856404;
+            margin-top: 0;
+        }
+        .security-notice p {
+            color: #856404;
+            margin-bottom: 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success-icon {
+            color: #28a745;
+            font-size: 48px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">BluPay</div>
+            <p>Your Digital Wallet</p>
+        </div>
+
+        <div class="success-icon">✅</div>
+        
+        <h2 class="title">PIN Changed Successfully</h2>
+        
+        <div class="content">
+            <p>Hello {{ user.get_full_name|default:user.email }},</p>
+            
+            <p>Your BluPay account PIN has been successfully changed. Here are the details:</p>
+            
+            <div class="info-box">
+                <div class="info-row">
+                    <span class="info-label">Account Number:</span>
+                    <span class="info-value">{{ account_number }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Changed On:</span>
+                    <span class="info-value">{{ change_date }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Previous PIN:</span>
+                    <span class="info-value">{{ old_pin_masked }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">New PIN:</span>
+                    <span class="info-value">{{ new_pin_masked }}</span>
+                </div>
+            </div>
+            
+            <div class="security-notice">
+                <h4>🔒 Security Notice</h4>
+                <p><strong>If you did not make this change:</strong></p>
+                <ul>
+                    <li>Contact our support team immediately</li>
+                    <li>Change your account password</li>
+                    <li>Review your recent account activity</li>
+                </ul>
+                <p>Your account security is our top priority.</p>
+            </div>
+            
+            <p><strong>Important Reminders:</strong></p>
+            <ul>
+                <li>Never share your PIN with anyone</li>
+                <li>Use your new PIN for all transactions</li>
+                <li>Keep your PIN confidential and secure</li>
+                <li>Contact support if you suspect any unauthorized access</li>
+            </ul>
+        </div>
+        
+        <div class="footer">
+            <p>This is an automated message from BluPay. Please do not reply to this email.</p>
+            <p>If you need assistance, contact our support team at support@blupay.com</p>
+            <p>&copy; 2024 BluPay. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -234,14 +234,67 @@ class KYCStep5Serializer(serializers.ModelSerializer):
 ############################################
 # PIN SERIALIZER
 ###########################################
+class ChangePinSerializer(serializers.Serializer):
+    """Serializer for changing account PIN"""
+    current_pin = serializers.CharField(max_length=4, min_length=4)
+    new_pin = serializers.CharField(max_length=4, min_length=4)
+    confirm_pin = serializers.CharField(max_length=4, min_length=4)
+    
+    def validate_current_pin(self, value):
+        """Validate current PIN format"""
+        if not value.isdigit():
+            raise serializers.ValidationError("PIN must contain only digits")
+        return value
+    
+    def validate_new_pin(self, value):
+        """Validate new PIN format and strength"""
+        if not value.isdigit():
+            raise serializers.ValidationError("PIN must contain only digits")
+        
+        # Check for weak PINs
+        weak_pins = ['0000', '1111', '2222', '3333', '4444', '5555', '6666', '7777', '8888', '9999', '1234', '4321']
+        if value in weak_pins:
+            raise serializers.ValidationError("Please choose a stronger PIN. Avoid sequential or repeated digits.")
+        
+        return value
+    
+    def validate(self, data):
+        """Cross-field validation"""
+        new_pin = data.get('new_pin')
+        confirm_pin = data.get('confirm_pin')
+        current_pin = data.get('current_pin')
+        
+        # Check if new PIN matches confirmation
+        if new_pin != confirm_pin:
+            raise serializers.ValidationError("New PIN and confirmation PIN do not match")
+        
+        # Check if new PIN is different from current PIN
+        if new_pin == current_pin:
+            raise serializers.ValidationError("New PIN must be different from current PIN")
+        
+        return data
+
 class SetPinSerializer(serializers.Serializer):
     pin = serializers.CharField(min_length=4, max_length=4)
 
-    def validate_pin(self, pin):
-        if not pin.isdigit():
-            raise serializers.ValidationError("PIN must consist of 4 digits.")
-        return pin
+    # def validate_pin(self, pin):
+    #     if not pin.isdigit():
+    #         raise serializers.ValidationError("PIN must consist of 4 digits.")
+    #     return pin
     
+
+    def validate_pin(self, value):
+        """Validate PIN format and strength"""
+        if not value.isdigit():
+            raise serializers.ValidationError("PIN must contain only digits")
+        
+        # Check for weak PINs
+        weak_pins = ['0000', '1111', '2222', '3333', '4444', '5555', '6666', '7777', '8888', '9999', '1234', '4321']
+        if value in weak_pins:
+            raise serializers.ValidationError("Please choose a stronger PIN. Avoid sequential or repeated digits.")
+        
+        return value
+
 
 
 

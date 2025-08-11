@@ -10,6 +10,7 @@ from .views import (
     search_account,
     initiate_transfer,
     confirm_transfer,
+    transaction_history,
     clickpesa_webhook,
     initiate_topup,
     check_payment_methods,
@@ -33,6 +34,7 @@ urlpatterns = [
     path('transfer/initiate/',         initiate_transfer, name='api-initiate-transfer'),
     path('transfer/<str:tx_id>/',      transaction_detail,name='api-transaction-detail'),
     path('transfer/<str:tx_id>/confirm/', confirm_transfer,name='api-confirm-transfer'),
+    path("transactions/history/", transaction_history, name="transaction-history"),
 
 
     #Top up API andpoints

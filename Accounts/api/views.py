@@ -8,7 +8,7 @@ from rest_framework.parsers import JSONParser, FormParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated,AllowAny
-from django.core.mail import send_mail
+from django.core.mail import send_mail, EmailMultiAlternatives
 from django.conf import settings
 from django.template.loader import render_to_string
 from rest_framework import generics  # Import generics from rest_framework
@@ -398,6 +398,202 @@ def set_pin(request):
     }, status=status.HTTP_200_OK)
 
 
+
+
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@parser_classes([JSONParser])
+def change_pin(request):
+    """
+    Change account PIN - requires current PIN for verification
+    """
+    serializer = ChangePinSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    account = get_object_or_404(Account, user=request.user)
+    
+    # Check if account has a PIN set
+    if not account.pin_number:
+        return Response(
+            {"detail": "No PIN is currently set. Please set a PIN first."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    # Verify current PIN
+    current_pin = serializer.validated_data['current_pin']
+    if account.pin_number != current_pin:
+        logger.warning(f"Invalid PIN change attempt for user {request.user.email}")
+        return Response(
+            {"detail": "Current PIN is incorrect."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    # Check if account is active
+    if account.account_status not in ['active', 'pending']:
+        return Response(
+            {"detail": "Account must be active to change PIN."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    # New PIN
+    new_pin = serializer.validated_data['new_pin']
+
+    # ✅ Ensure new PIN is unique
+    if Account.objects.filter(pin_number=new_pin).exclude(pk=account.pk).exists():
+        return Response(
+            {"detail": "This PIN is already in use by another account."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    old_pin = account.pin_number
+    account.pin_number = new_pin
+    account.save()
+    
+    # Send confirmation email
+    try:
+        subject = "BluPay PIN Changed Successfully"
+        html_body = render_to_string("emails/pin_changed.html", {
+            "user": request.user,
+            "account_number": account.account_number,
+            "change_date": timezone.now().strftime("%Y-%m-%d %H:%M"),
+            "old_pin_masked": f"***{old_pin[-1]}",
+            "new_pin_masked": f"***{new_pin[-1]}",
+        })
+        
+        email = EmailMultiAlternatives(
+            subject=subject,
+            body="Your BluPay PIN has been changed successfully.",
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[request.user.email],
+        )
+        email.attach_alternative(html_body, "text/html")
+        email.send(fail_silently=True)
+        
+        logger.info(f"PIN changed successfully for user {request.user.email}")
+    except Exception as e:
+        logger.error(f"Failed to send PIN change email to {request.user.email}: {e}")
+    
+    return Response({
+        "message": "PIN changed successfully. A confirmation email has been sent.",
+        "account_number": account.account_number,
+        "changed_at": timezone.now().isoformat(),
+    }, status=status.HTTP_200_OK)
+    
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@parser_classes([JSONParser])
+def reset_pin(request):
+    """
+    Reset PIN using security questions or admin approval
+    This is for users who forgot their PIN
+    """
+    account = get_object_or_404(Account, user=request.user)
+    
+    # Check if KYC is confirmed (security requirement)
+    if not account.kyc_confirmed:
+        return Response(
+            {"detail": "KYC verification required for PIN reset."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    # For now, we'll require admin approval for PIN reset
+    # In a production system, you might implement security questions
+    
+    # Generate a temporary reset token (you could store this in the database)
+    reset_token = uuid.uuid4().hex[:8].upper()
+    
+    # Send email to user with reset instructions
+    try:
+        subject = "BluPay PIN Reset Request"
+        html_body = render_to_string("emails/pin_reset_request.html", {
+            "user": request.user,
+            "account_number": account.account_number,
+            "reset_token": reset_token,
+            "request_date": timezone.now().strftime("%Y-%m-%d %H:%M"),
+        })
+        
+        email = EmailMultiAlternatives(
+            subject=subject,
+            body="PIN reset request received. Please contact support.",
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[request.user.email],
+        )
+        email.attach_alternative(html_body, "text/html")
+        email.send(fail_silently=True)
+        
+        # Also send notification to admin/support
+        admin_email = getattr(settings, 'ADMIN_EMAIL', 'info@theblupay.com')
+        admin_subject = f"PIN Reset Request - {account.account_number}"
+        admin_body = f"""
+        PIN reset request received:
+        
+        User: {request.user.email}
+        Account: {account.account_number}
+        Reset Token: {reset_token}
+        Request Time: {timezone.now()}
+        
+        Please verify the user's identity before approving the reset.
+        """
+        
+        send_mail(
+            admin_subject,
+            admin_body,
+            settings.DEFAULT_FROM_EMAIL,
+            [admin_email],
+            fail_silently=True
+        )
+        
+        logger.info(f"PIN reset requested for user {request.user.email}")
+    except Exception as e:
+        logger.error(f"Failed to send PIN reset email to {request.user.email}: {e}")
+    
+    return Response({
+        "message": "PIN reset request submitted. Please check your email for further instructions.",
+        "reset_token": reset_token,
+        "status": "pending_approval"
+    }, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@parser_classes([JSONParser])
+def verify_pin(request):
+    """
+    Verify PIN without changing it - useful for sensitive operations
+    """
+    pin = request.data.get('pin')
+    if not pin:
+        return Response(
+            {"detail": "PIN is required."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    if len(pin) != 4 or not pin.isdigit():
+        return Response(
+            {"detail": "PIN must be 4 digits."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    account = get_object_or_404(Account, user=request.user)
+    
+    if not account.pin_number:
+        return Response(
+            {"detail": "No PIN is set for this account."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    is_valid = account.pin_number == pin
+    
+    if not is_valid:
+        logger.warning(f"Invalid PIN verification attempt for user {request.user.email}")
+    
+    return Response({
+        "valid": is_valid,
+        "message": "PIN verified successfully" if is_valid else "Invalid PIN"
+    }, status=status.HTTP_200_OK if is_valid else status.HTTP_400_BAD_REQUEST)
 
 
 

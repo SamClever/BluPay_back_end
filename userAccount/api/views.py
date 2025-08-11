@@ -28,8 +28,8 @@ from django.contrib.auth.password_validation import validate_password
 from rest_framework.exceptions import ValidationError
 import requests
 from django.core.mail import EmailMultiAlternatives
-
-
+import re
+from django.core.exceptions import ValidationError
 User = get_user_model()
 
 
@@ -335,25 +335,20 @@ def verify_forgot_password_otp(request):
 @permission_classes([AllowAny])
 def reset_password(request):
     """
-    Endpoint to reset the user's password.
-    Expects:
-      {
-         "email": "user@example.com",
-         "new_password": "NewSecurePassword123!",
-         "confirm_password": "NewSecurePassword123!"
-      }
-    The endpoint checks for a verified OTP (purpose "forgot_password") before resetting the password.
+    Reset the user's password after OTP verification with strong validations.
     """
     email = request.data.get("email")
     new_password = request.data.get("new_password")
     confirm_password = request.data.get("confirm_password")
 
+    # Check required fields
     if not email or not new_password or not confirm_password:
         return Response(
             {"error": "Email, new_password, and confirm_password are required."},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
+    # Match passwords
     if new_password != confirm_password:
         return Response(
             {"error": "New password and confirmation do not match."},
@@ -365,34 +360,153 @@ def reset_password(request):
     except User.DoesNotExist:
         return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 
-    # Check that there is a verified OTP record for forgot_password
+    # Check verified OTP
     otp_record = (
         user.otp_verifications.filter(purpose="forgot_password", verified=True)
         .order_by("-created_at")
         .first()
     )
-
     if not otp_record:
         return Response(
             {"error": "OTP verification required before resetting password."},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    # Optionally, you can add a check for OTP expiration here.
+    # Strong password validations
+    if len(new_password) < 8:
+        return Response(
+            {"error": "Password must be at least 8 characters long."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    if not re.search(r"[A-Z]", new_password):
+        return Response(
+            {"error": "Password must contain at least one uppercase letter."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    if not re.search(r"[a-z]", new_password):
+        return Response(
+            {"error": "Password must contain at least one lowercase letter."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    if not re.search(r"\d", new_password):
+        return Response(
+            {"error": "Password must contain at least one digit."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", new_password):
+        return Response(
+            {"error": "Password must contain at least one special character (!@#$%^&* etc)."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    if user.username.lower() in new_password.lower() or user.email.lower() in new_password.lower():
+        return Response(
+            {"error": "Password cannot contain your username or email."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
+    # Django's built-in password validation (checks common passwords, similarity, etc.)
     try:
         validate_password(new_password, user)
     except ValidationError as e:
         return Response({"error": e.messages}, status=status.HTTP_400_BAD_REQUEST)
 
+    # Save new password
     user.set_password(new_password)
     user.save()
 
-    # Optionally, mark or delete the OTP record so it can't be reused.
+    # Delete OTP after use
     otp_record.delete()
 
     return Response(
         {"message": "Password reset successfully."}, status=status.HTTP_200_OK
+    )
+
+
+
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def change_password(request):
+    """
+    Change password for the logged-in user.
+    Requires old_password, new_password, confirm_password.
+    """
+    user = request.user
+    old_password = request.data.get("old_password")
+    new_password = request.data.get("new_password")
+    confirm_password = request.data.get("confirm_password")
+
+    # Required fields
+    if not old_password or not new_password or not confirm_password:
+        return Response(
+            {"error": "old_password, new_password, and confirm_password are required."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    # Verify old password
+    if not user.check_password(old_password):
+        return Response(
+            {"error": "Old password is incorrect."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    # Match new & confirm
+    if new_password != confirm_password:
+        return Response(
+            {"error": "New password and confirmation do not match."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    # Strong password checks
+    if len(new_password) < 8:
+        return Response(
+            {"error": "Password must be at least 8 characters long."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    if not re.search(r"[A-Z]", new_password):
+        return Response(
+            {"error": "Password must contain at least one uppercase letter."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    if not re.search(r"[a-z]", new_password):
+        return Response(
+            {"error": "Password must contain at least one lowercase letter."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    if not re.search(r"\d", new_password):
+        return Response(
+            {"error": "Password must contain at least one digit."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", new_password):
+        return Response(
+            {"error": "Password must contain at least one special character (!@#$%^&* etc)."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    if user.username.lower() in new_password.lower() or user.email.lower() in new_password.lower():
+        return Response(
+            {"error": "Password cannot contain your username or email."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    # Django's built-in password validation
+    try:
+        validate_password(new_password, user)
+    except ValidationError as e:
+        return Response({"error": e.messages}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Save the new password
+    user.set_password(new_password)
+    user.save()
+
+    # (Optional) Invalidate all sessions/tokens for security
+    from rest_framework.authtoken.models import Token
+    Token.objects.filter(user=user).delete()
+
+    return Response(
+        {"message": "Password changed successfully. Please log in again."},
+        status=status.HTTP_200_OK,
     )
 
 

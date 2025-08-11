@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PIN Reset Request - BluPay</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #007bff;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+        .title {
+            color: #ffc107;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .content {
+            margin-bottom: 30px;
+        }
+        .info-box {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #ffc107;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 5px 0;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #495057;
+        }
+        .info-value {
+            color: #007bff;
+            font-weight: 500;
+        }
+        .warning-notice {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .warning-notice h4 {
+            color: #721c24;
+            margin-top: 0;
+        }
+        .warning-notice p {
+            color: #721c24;
+            margin-bottom: 0;
+        }
+        .reset-token {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #495057;
+            letter-spacing: 2px;
+            margin: 20px 0;
+            border: 2px dashed #6c757d;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .warning-icon {
+            color: #ffc107;
+            font-size: 48px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .steps {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .steps h4 {
+            color: #0c5460;
+            margin-top: 0;
+        }
+        .steps ol {
+            color: #0c5460;
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">BluPay</div>
+            <p>Your Digital Wallet</p>
+        </div>
+
+        <div class="warning-icon">⚠️</div>
+        
+        <h2 class="title">PIN Reset Request Received</h2>
+        
+        <div class="content">
+            <p>Hello {{ user.get_full_name|default:user.email }},</p>
+            
+            <p>We have received a request to reset your BluPay account PIN. Here are the details:</p>
+            
+            <div class="info-box">
+                <div class="info-row">
+                    <span class="info-label">Account Number:</span>
+                    <span class="info-value">{{ account_number }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Request Date:</span>
+                    <span class="info-value">{{ request_date }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Reset Token:</span>
+                    <span class="info-value">{{ reset_token }}</span>
+                </div>
+            </div>
+            
+            <div class="reset-token">
+                {{ reset_token }}
+            </div>
+            
+            <div class="steps">
+                <h4>📋 Next Steps</h4>
+                <ol>
+                    <li>Contact our support team at support@blupay.com</li>
+                    <li>Provide your reset token: <strong>{{ reset_token }}</strong></li>
+                    <li>Complete identity verification process</li>
+                    <li>Receive your new PIN via secure channel</li>
+                </ol>
+            </div>
+            
+            <div class="warning-notice">
+                <h4>🚨 Security Alert</h4>
+                <p><strong>If you did not request this PIN reset:</strong></p>
+                <ul>
+                    <li>Contact our support team immediately</li>
+                    <li>Change your account password</li>
+                    <li>Review your recent account activity</li>
+                    <li>Consider enabling additional security features</li>
+                </ul>
+                <p>Your account security is our top priority.</p>
+            </div>
+            
+            <p><strong>Important Information:</strong></p>
+            <ul>
+                <li>This reset token is valid for 24 hours</li>
+                <li>You will need to verify your identity before PIN reset</li>
+                <li>Keep this reset token confidential</li>
+                <li>Our support team will never ask for your current PIN</li>
+            </ul>
+        </div>
+        
+        <div class="footer">
+            <p>This is an automated message from BluPay. Please do not reply to this email.</p>
+            <p>For immediate assistance, contact our support team at support@blupay.com</p>
+            <p>&copy; 2024 BluPay. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

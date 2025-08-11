@@ -427,6 +427,51 @@ def confirm_transfer(request, tx_id):
 
 
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def transaction_history(request):
+    """
+    GET /api/transactions/history/
+
+    Returns transactions where the authenticated user is either sender or receiver.
+    Optional filters:
+        - type: 'credit' or 'debit'
+        - status: 'pending', 'success', 'failed'
+        - start_date: YYYY-MM-DD
+        - end_date: YYYY-MM-DD
+    """
+    user = request.user
+
+    # Get transactions where the user is sender OR receiver
+    qs = Transaction.objects.filter(
+        Q(sender=user) | Q(reciver=user)
+    )
+
+    # Filter by transaction type
+    tx_type = request.query_params.get("type")
+    if tx_type in ["credit", "debit"]:
+        qs = qs.filter(transaction_type=tx_type)
+
+    # Filter by status
+    status_param = request.query_params.get("status")
+    if status_param:
+        qs = qs.filter(status=status_param)
+
+    # Date filtering
+    start_date = request.query_params.get("start_date")
+    if start_date:
+        qs = qs.filter(date__date__gte=start_date)
+
+    end_date = request.query_params.get("end_date")
+    if end_date:
+        qs = qs.filter(date__date__lte=end_date)
+
+    # Order by most recent
+    qs = qs.order_by("-date")
+
+    return Response(TransactionSerializer(qs, many=True).data, status=status.HTTP_200_OK)
+
+
 
 # -----------------------------------------------------------------------------
 # Top-up API Endpoints
